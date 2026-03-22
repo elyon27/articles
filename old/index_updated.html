@@ -338,7 +338,7 @@
     // Location of your PDFs and optional cover images
     const PDF_DIR   = "assets/articles/";
     const COVERS_DIR = "assets/articles/covers/";
-    const MANIFEST  = new URL("./assets/articles/articles.json", window.location.href).href;
+    const MANIFEST  = PDF_DIR + "articles.json";
 
     const grid = document.getElementById("grid");
     const empty = document.getElementById("empty");
@@ -505,7 +505,6 @@
 
     async function loadManifest(){
       try{
-        // fetch() usually fails when this page is opened directly with file:/// instead of through a web server.
         const res = await fetch(MANIFEST, { cache: "no-store" });
         if (!res.ok) throw new Error("Manifest not found: " + MANIFEST);
         const data = await res.json();
@@ -517,10 +516,8 @@
         all = list.filter(x => x && x.file);
 
         render(all);
-        empty.style.display = "none";
-        empty.innerHTML = "";
       }catch(err){
-        console.error("Manifest load failed:", err);
+        console.error(err);
 
         // Fallback sample list (edit if you want a hardcoded option)
         all = [
@@ -568,20 +565,12 @@
 
         ];
         render(all);
-
-        // Keep the page clean when fallback content exists.
-        // Only show the warning when there is absolutely nothing to render.
-        if (!all.length){
-          empty.style.display = "block";
-          empty.innerHTML = `
-            Could not load <b>${MANIFEST}</b>.<br/>
-            This usually means either the file path is wrong or the page is being opened with <b>file:///</b> instead of a web server.<br/>
-            Serve the site through localhost or Netlify to let fetch() read JSON files.
-          `;
-        } else {
-          empty.style.display = "none";
-          empty.innerHTML = "";
-        }
+        empty.style.display = "block";
+        empty.innerHTML = `
+          Could not load <b>${MANIFEST}</b>.<br/>
+          Create it to auto-render your PDFs, or hardcode your list in this page.<br/>
+          (Open DevTools Console to see the error.)
+        `;
       }
     }
 

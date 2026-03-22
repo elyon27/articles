@@ -90,10 +90,7 @@
     }
     @media (max-width: 640px){
       .page-head{ flex-direction:column; align-items:flex-start; }
-      .toolbar{ width:100%; }
       .search{ width:100%; min-width:0; }
-      .count-chip, .category-group{ width:100%; }
-      .category-group{ justify-content:flex-start; }
       .grid{ grid-template-columns: 1fr; }
     }
 
@@ -211,50 +208,6 @@
       color: var(--muted);
     }
 
-    .count-chip,
-    .category-chip{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:6px;
-      min-height: 42px;
-      padding: 0 14px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      white-space: nowrap;
-    }
-
-    .count-chip{
-      box-shadow: 0 0 0 rgba(216,180,106,0);
-      animation: countGlow 2.8s ease-in-out infinite;
-    }
-
-    .count-chip strong,
-    .category-chip strong{
-      color: var(--gold);
-      font-weight: 700;
-    }
-
-    .category-group{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    @keyframes countGlow {
-      0%, 100% {
-        box-shadow: 0 0 0 rgba(216,180,106,0);
-        border-color: rgba(255,255,255,.12);
-      }
-      50% {
-        box-shadow: 0 0 18px rgba(216,180,106,.18);
-        border-color: rgba(216,180,106,.36);
-      }
-    }
-
     .empty{
       margin-top: 18px;
       padding: 16px;
@@ -316,21 +269,10 @@
           <span style="opacity:.8;">🔎</span>
           <input id="q" type="search" placeholder="Search title…" autocomplete="off" />
         </div>
-
-        <div id="article-count" class="count-chip small" aria-live="polite">
-          <strong>0</strong> Articles
-        </div>
-
-        <div class="category-group small" aria-label="Category breakdown">
-          <div id="count-pdf" class="category-chip"><strong>0</strong> PDF</div>
-          <div id="count-scroll" class="category-chip"><strong>0</strong> Scroll</div>
-          <div id="count-doctrine" class="category-chip"><strong>0</strong> Doctrine</div>
-        </div>
       </div>
     </div>
 
     <section class="grid" id="grid" aria-live="polite"></section>
-    <div class="empty" id="empty"></div>
 
   </main>
 
@@ -338,15 +280,11 @@
     // Location of your PDFs and optional cover images
     const PDF_DIR   = "assets/articles/";
     const COVERS_DIR = "assets/articles/covers/";
-    const MANIFEST  = new URL("./assets/articles/articles.json", window.location.href).href;
+    const MANIFEST  = PDF_DIR + "articles.json";
 
     const grid = document.getElementById("grid");
     const empty = document.getElementById("empty");
     const q = document.getElementById("q");
-    const countEl = document.getElementById("article-count");
-    const countPdfEl = document.getElementById("count-pdf");
-    const countScrollEl = document.getElementById("count-scroll");
-    const countDoctrineEl = document.getElementById("count-doctrine");
 
     let all = [];
 
@@ -455,40 +393,10 @@
       return card;
     }
 
-    function getCategory(item){
-      const tag = (item.tag || "PDF").trim().toLowerCase();
-      if (tag.includes("scroll")) return "Scroll";
-      if (tag.includes("doctrine")) return "Doctrine";
-      return "PDF";
-    }
-
-    function updateCounts(list){
-      const counts = { PDF: 0, Scroll: 0, Doctrine: 0 };
-
-      list.forEach(item => {
-        const category = getCategory(item);
-        counts[category] = (counts[category] || 0) + 1;
-      });
-
-      if (countEl) {
-        countEl.innerHTML = `<strong>${list.length}</strong> Article${list.length !== 1 ? "s" : ""}`;
-      }
-      if (countPdfEl) {
-        countPdfEl.innerHTML = `<strong>${counts.PDF}</strong> PDF`;
-      }
-      if (countScrollEl) {
-        countScrollEl.innerHTML = `<strong>${counts.Scroll}</strong> Scroll`;
-      }
-      if (countDoctrineEl) {
-        countDoctrineEl.innerHTML = `<strong>${counts.Doctrine}</strong> Doctrine`;
-      }
-    }
-
     function render(list){
       grid.innerHTML = "";
       list.forEach(item => grid.appendChild(buildCard(item)));
       empty.style.display = list.length ? "none" : "block";
-      updateCounts(list);
     }
 
     function applyFilter(){
@@ -505,7 +413,6 @@
 
     async function loadManifest(){
       try{
-        // fetch() usually fails when this page is opened directly with file:/// instead of through a web server.
         const res = await fetch(MANIFEST, { cache: "no-store" });
         if (!res.ok) throw new Error("Manifest not found: " + MANIFEST);
         const data = await res.json();
@@ -517,19 +424,17 @@
         all = list.filter(x => x && x.file);
 
         render(all);
-        empty.style.display = "none";
-        empty.innerHTML = "";
       }catch(err){
-        console.error("Manifest load failed:", err);
+        console.error(err);
 
         // Fallback sample list (edit if you want a hardcoded option)
         all = [
 
           { title: "I Am Who I Am", file: "I Am Who I Am.pdf", description: "“I Am Who I Am” is a profound exploration of identity beyond illusion—an unveiling of the eternal essence that exists apart from titles, past, and becoming. It invites the reader into a deeper encounter with truth itself: not as something to achieve, but as something ever-present, unchanging, and silently calling from within." },
 
-          { title: "Why Do You Call Me Lord?", file: "Why Call Me Lord.pdf", description: "“Why Do You Call Me Lord?” is a piercing and transformative reflection that confronts the quiet contradiction between confession and obedience. It unveils the deeper meaning behind the word Lord, revealing that true surrender is not spoken—but lived. This article calls the reader beyond empty reverence into a life of alignment, where the throne of the heart is no longer self-ruled, but yielded fully to truth.", tag: "Doctrine" },
+          { title: "Why Do You Call Me Lord?", file: "Why Call Me Lord.pdf", description: "“Why Do You Call Me Lord?” is a piercing and transformative reflection that confronts the quiet contradiction between confession and obedience. It unveils the deeper meaning behind the word Lord, revealing that true surrender is not spoken—but lived. This article calls the reader beyond empty reverence into a life of alignment, where the throne of the heart is no longer self-ruled, but yielded fully to truth." },
 
-          { title: "The 3 Witnesses (Spirit, Blood, Water)", file: "The 3 Witnesses.pdf", description: "The 3 Witnesses (Spirit, Blood, and Water) unveils a profound spiritual pattern that transcends doctrine and speaks directly to the soul. It reveals how truth is not merely spoken—but confirmed through divine alignment: the Spirit that inwardly knows, the Water that transforms, and the Blood that seals reality through sacrifice. This article invites the reader to recognize that true reality is not argued, but witnessed—within creation, within Christ, and within themselves.", tag: "Doctrine" },
+          { title: "The 3 Witnesses (Spirit, Blood, Water)", file: "The 3 Witnesses.pdf", description: "The 3 Witnesses (Spirit, Blood, and Water) unveils a profound spiritual pattern that transcends doctrine and speaks directly to the soul. It reveals how truth is not merely spoken—but confirmed through divine alignment: the Spirit that inwardly knows, the Water that transforms, and the Blood that seals reality through sacrifice. This article invites the reader to recognize that true reality is not argued, but witnessed—within creation, within Christ, and within themselves." },
 
           { title: "There Has Never Been Any Shades Of Gray", file: "Never Any Shades Of Gray.pdf", description: "A piercing reflection on truth and illusion, There Has Never Been Any Shades of Gray unveils the hidden cost of moral compromise and the quiet deception of “in-between” thinking. It calls the reader back to a place of inner clarity—where truth stands undivided, choices are unmistakable, and the soul is invited to walk the narrow path between light and darkness with unwavering conviction." },
 
@@ -545,9 +450,9 @@
 
           { title: "Setting Boundaries", file: "Setting Boundaries.pdf", description: "A powerful reflection on the unseen cost of people-pleasing, Setting Boundaries challenges the belief that endless giving is a virtue. It reveals how the absence of limits leads to self-abandonment, and how reclaiming one’s inner space is an act of truth, not selfishness. With quiet intensity, the article invites readers to draw sacred lines—not to shut others out, but to finally return to themselves." },
 
-          { title: "Cry Of The Watchers", file: "Cry Of The Watchers.pdf", description: "A prophetic call to spiritual             remembrance, this article declares the awakening of the Watchers and the convergence of the elect in the final hour             of divine unveiling", tag: "Scroll" },
+          { title: "Cry Of The Watchers", file: "Cry Of The Watchers.pdf", description: "A prophetic call to spiritual             remembrance, this article declares the awakening of the Watchers and the convergence of the elect in the final hour             of divine unveiling" },
 
-          { title: "The Refining Fire", file: "The Refining Fire.pdf", description: "A prophetic reflection on divine              purification, this article portrays the Refining Fire as God’s transforming process through which the Elect are                 cleansed, tested, and made vessels of eternal light", tag: "Scroll" },
+          { title: "The Refining Fire", file: "The Refining Fire.pdf", description: "A prophetic reflection on divine              purification, this article portrays the Refining Fire as God’s transforming process through which the Elect are                 cleansed, tested, and made vessels of eternal light" },
 
          { title: "God Gives His Hardest Battles To His Strongest Soldiers", file: "God's Hardest Battles.pdf", description:       "This article affirms that life’s hardest trials are divine assignments meant to    refine, strengthen, and prepare God’s       chosen soldiers for higher purpose and eternal victory" },
 
@@ -568,20 +473,12 @@
 
         ];
         render(all);
-
-        // Keep the page clean when fallback content exists.
-        // Only show the warning when there is absolutely nothing to render.
-        if (!all.length){
-          empty.style.display = "block";
-          empty.innerHTML = `
-            Could not load <b>${MANIFEST}</b>.<br/>
-            This usually means either the file path is wrong or the page is being opened with <b>file:///</b> instead of a web server.<br/>
-            Serve the site through localhost or Netlify to let fetch() read JSON files.
-          `;
-        } else {
-          empty.style.display = "none";
-          empty.innerHTML = "";
-        }
+        empty.style.display = "block";
+        empty.innerHTML = `
+          Could not load <b>${MANIFEST}</b>.<br/>
+          Create it to auto-render your PDFs, or hardcode your list in this page.<br/>
+          (Open DevTools Console to see the error.)
+        `;
       }
     }
 
