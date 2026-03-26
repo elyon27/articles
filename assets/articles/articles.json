@@ -1,5 +1,37 @@
 {
   "articles": [
+    
+    {
+      "title": "The Inner Sanctuary",
+      "file": "The Inner Sanctuary.pdf",
+      "description": "A revelation of the hidden chamber within where the soul meets truth in silence and alignment.",
+      "categories": ["Spiritual Growth", "Wisdom & Character", "Kingdom Living"]
+    },
+    {
+      "title": "The Importance Of Vigilance",
+      "file": "The Importance Of Vigilance.pdf",
+      "description": "A call to remain awake and discerning in a world filled with subtle deception.",
+      "categories": ["Prophetic Scrolls", "Spiritual Growth"]
+    },
+    {
+      "title": "The Look But Not See",
+      "file": "They Look But Not See.pdf",
+      "description": "An unveiling of perception—how many observe yet fail to truly see.",
+      "categories": ["Doctrine & Revelation", "Wisdom & Character"]
+    },
+    {
+      "title": "Brave New World",
+      "file": "Brave New World.pdf",
+      "description": "A reflection on the emerging world shaped by unseen forces and awakened awareness.",
+      "categories": ["Prophetic Scrolls", "Kingdom Living"]
+    },
+    {
+      "title": "My Sheep Hear My Voice",
+      "file": "My Sheep Hear My Voice.pdf",
+      "description": "A revelation of recognition between the Shepherd and those who truly belong.",
+      "categories": ["Doctrine & Revelation", "Spiritual Growth", "Kingdom Living"]
+    },
+
     {
       "title": "I Am Who I Am",
       "file": "I Am Who I Am.pdf",
