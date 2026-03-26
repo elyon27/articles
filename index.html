@@ -600,6 +600,7 @@
 
     async function loadManifest() {
       try {
+        fetch('/assets/articles/articles.json')
         const res = await fetch(MANIFEST, { cache: "no-store" });
         if (!res.ok) throw new Error("Manifest not found: " + MANIFEST);
         const data = await res.json();
