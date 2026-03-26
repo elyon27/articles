@@ -1,0 +1,22 @@
+The Netlify deploy errored, with the following guidance provided:
+
+**Diagnosis**  
+- The build fails during Netlify’s configuration parsing because the configured base directory points to `/opt/build`, which does not exist in the repository. See [line 7](#L7).
+
+**Solution**  
+- In the Netlify site settings (Site configuration → Build & deploy → Build settings), edit the Base directory so that it points to the correct project folder (for this repo it should likely be left blank or set to `.`), then save and retrigger the build. If you are defining the base directory in `netlify.toml`, make sure it matches an actual folder in the repo.
+
+The relevant error logs are:
+
+Line 0: build-image version: a0bc76c99cbadd99a168cf193f4d4df9fa7ee94a (noble-new-builds)
+Line 1: buildbot version: fbebc7d9335e413478334a6e6a4e8e1087eed35b
+Line 2: Building without cache
+Line 3: Starting to prepare the repo for build
+Line 4: No cached dependencies found. Cloning fresh repo
+Line 5: git clone --filter=blob:none https://github.com/elyon27/articles
+Line 6: Preparing Git Reference refs/heads/main
+Line 7: Failed during stage 'Reading and parsing configuration files': 
+When resolving config:
+Base directory does not exist: /opt/build
+Line 8: Failing build: Failed to parse configuration
+Line 9: Finished processing build request in 2.881s
