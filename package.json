@@ -1,0 +1,8 @@
+{
+  "name": "articles-site",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "generate:articles": "node generate-articles.js"
+  }
+}
