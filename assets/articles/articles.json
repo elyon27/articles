@@ -1,5 +1,17 @@
 [
   {
+    "title": "Because You Live",
+    "file": "Because You Live.pdf",
+    "description": "A profound reflection on the source of true life, this article unveils the eternal truth that our existence is not sustained by our own strength, but by the One who overcame death itself. It invites the reader into a deeper awakening—where fear loses its hold, identity is restored, and life is no longer temporary, but anchored in an unshakable, living reality.",
+    "categories": [
+      "Doctrine & Revelation",
+      "Spiritual Growth",
+      "Kingdom Living"
+    ],
+    "cover": "Because You Live.png",
+    "date": "2026-03-27"
+  },
+  {
     "title": "Brave New World",
     "file": "Brave New World.pdf",
     "description": "A profound reflection on a world that no longer enslaves through force, but through comfort, distraction, and illusion. Brave New World unveils the subtle shift from truth to convenience, urging the reader to awaken, discern, and return to the quiet voice that leads beyond deception.",
@@ -159,6 +171,18 @@
     "date": "2026-03-27"
   },
   {
+    "title": "The End Justifies The Means",
+    "file": "The End Justifies The Means.pdf",
+    "description": "A piercing reflection on the hidden cost of compromise, this article unveils the truth that the path we choose shapes not only our outcomes, but our very being. It challenges the seductive belief that results can sanctify wrongdoing, revealing instead that every action forms the soul. In the end, it is not success that defines a man—but whether he remained aligned with truth while pursuing it.",
+    "categories": [
+      "Doctrine & Revelation",
+      "Spiritual Growth",
+      "Wisdom & Character"
+    ],
+    "cover": "The End Justifies The Means.png",
+    "date": "2026-03-27"
+  },
+  {
     "title": "The Importance Of Vigilance",
     "file": "The Importance Of Vigilance.pdf",
     "description": "A watchful soul is a guarded soul. This article unveils the quiet power of vigilance—the discipline of remaining awake in a world that drifts into unconsciousness. It calls the reader to stand at the gate of their own life with clarity, discernment, and unwavering awareness, preserving truth, protecting purpose, and resisting the subtle forces that seek to erode what is sacred.",
@@ -271,6 +295,30 @@
       "Doctrine & Revelation"
     ],
     "cover": "Why Call Me Lord.png",
+    "date": "2026-03-27"
+  },
+  {
+    "title": "You Are More Than Life",
+    "file": "You Are More Than Life.pdf",
+    "description": "A profound reflection on the true nature of being, this article unveils that human existence is not confined to breath, body, or time. It gently guides the reader inward, revealing a deeper awareness that transcends life itself—an unchanging presence that witnesses, endures, and gives meaning to all experience.",
+    "categories": [
+      "Spiritual Growth",
+      "Doctrine & Revelation",
+      "Wisdom & Character"
+    ],
+    "cover": "You Are More Than Life.png",
+    "date": "2026-03-27"
+  },
+  {
+    "title": "Your Past Will Not Define You",
+    "file": "Your Past Will Not Define You.pdf",
+    "description": "A profound reflection on the illusion of identity shaped by past wounds, this article unveils the liberating truth that history does not hold the authority to define the soul. It calls the reader beyond regret, shame, and former failures into a higher alignment—where identity is no longer rooted in what has been, but in what is eternally true and still becoming.",
+    "categories": [
+      "Spiritual Growth",
+      "Wisdom & Character",
+      "Kingdom Living"
+    ],
+    "cover": "Your Past Will Not Define You.png",
     "date": "2026-03-27"
   }
 ]
