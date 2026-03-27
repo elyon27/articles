@@ -475,12 +475,17 @@
       const desc = item.description || "PDF article";
       const categories = getCategories(item);
       const pdfHref = PDF_DIR + file;
+
+      const coverCandidates = [];
+      if (item.cover) coverCandidates.push(COVERS_DIR + item.cover);
+
       const name = baseName(file);
-      const coverCandidates = [
+      coverCandidates.push(
         COVERS_DIR + name + ".jpg",
         COVERS_DIR + name + ".png",
-        COVERS_DIR + name + ".webp"
-      ];
+        COVERS_DIR + name + ".webp",
+        COVERS_DIR + name + ".jpeg"
+      );
 
       const card = document.createElement("article");
       card.className = "card";
@@ -498,7 +503,7 @@
         <div>
           <div style="font-size:34px; line-height:1;">📄</div>
           <div style="margin-top:8px;">No cover image</div>
-          <div style="margin-top:4px; font-size:12px; opacity:.9;">Add: <b>assets/articles/covers/${escapeHtml(name)}.jpg</b></div>
+          <div style="margin-top:4px; font-size:12px; opacity:.9;">Add: <b>assets/articles/covers/${escapeHtml    (name)}.jpg</b></div>
         </div>
       `;
 
@@ -510,16 +515,28 @@
         }
         img.src = coverCandidates[tried++];
       }
+
       img.onerror = tryNextCover;
-      img.onload = () => { if (thumb.contains(fallback)) fallback.remove(); };
+      img.onload = () => {
+        if (thumb.contains(fallback)) fallback.remove();
+      };
       tryNextCover();
 
       thumb.appendChild(img);
 
+      const numberBadge = document.createElement("button");
+      numberBadge.className = "badge article-number";
+      numberBadge.type = "button";
+      numberBadge.textContent = "#" + (item.number ?? "");
+      thumb.appendChild(numberBadge);
+
       const content = document.createElement("div");
       content.className = "content";
 
-      const categoriesHtml = categories.map(cat => `<span class="article-category">${escapeHtml(cat)}</span>`).join("");
+      const categoriesHtml = categories
+        .map(cat => `<span class="article-category">${escapeHtml(cat)}</span>`)
+        .join("");
+
       content.innerHTML = `
         <h3 class="title">${escapeHtml(title)}</h3>
         <div class="article-categories">${categoriesHtml}</div>
@@ -546,6 +563,7 @@
 
       card.appendChild(thumb);
       card.appendChild(content);
+
       return card;
     }
 
@@ -605,7 +623,12 @@
         if (!res.ok) throw new Error("Manifest not found: " + MANIFEST);
         const data = await res.json();
         const list = Array.isArray(data) ? data : (data.articles || []);
-        all = list.filter(x => x && x.file);
+        all = list
+          .filter(x => x && x.file)
+          .map((item, index) => ({
+            ...item,
+            number: item.number ?? index + 1
+          }));
         applyFilter();
       } catch (err) {
         console.error("Manifest load failed:", err);

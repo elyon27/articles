@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Article Upload</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 16px; }
+    form { display: grid; gap: 12px; }
+    input, textarea, button { padding: 12px; font-size: 16px; }
+    textarea { min-height: 120px; }
+    .hint { color: #666; font-size: 14px; }
+    .row { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+    #status { white-space: pre-wrap; background: #f7f7f7; padding: 12px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Upload Article</h1>
+  <p class="hint">Use this with the accompanying <code>articles.js</code> helper.</p>
+
+  <form id="articleForm">
+    <input id="title" placeholder="Article title" required />
+    <textarea id="description" placeholder="Description"></textarea>
+    <input id="excerpt" placeholder="Short excerpt" />
+    <input id="categories" placeholder="Categories separated by commas" />
+    <input id="tags" placeholder="Tags separated by commas" />
+    <div class="row">
+      <label>PDF file <input id="pdfFile" type="file" accept="application/pdf" required /></label>
+      <label>Cover image <input id="coverFile" type="file" accept="image/png,image/jpeg,image/webp" /></label>
+    </div>
+    <button type="submit">Upload Article</button>
+  </form>
+
+  <pre id="status">Ready.</pre>
+
+  <script type="module">
+    import { createArticleWithFiles } from '../src/api/articles.js';
+
+    const form = document.getElementById('articleForm');
+    const status = document.getElementById('status');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      status.textContent = 'Uploading...';
+
+      try {
+        const result = await createArticleWithFiles({
+          title: document.getElementById('title').value,
+          description: document.getElementById('description').value,
+          excerpt: document.getElementById('excerpt').value,
+          categories: document.getElementById('categories').value.split(',').map(v => v.trim()).filter(Boolean),
+          tags: document.getElementById('tags').value.split(',').map(v => v.trim()).filter(Boolean),
+          pdfFile: document.getElementById('pdfFile').files[0],
+          coverFile: document.getElementById('coverFile').files[0] || null,
+          isPublished: true,
+        });
+
+        status.textContent = `Success!\n\n${JSON.stringify(result, null, 2)}`;
+        form.reset();
+      } catch (error) {
+        status.textContent = `Upload failed:\n\n${error.message}`;
+      }
+    });
+  </script>
+</body>
+</html>

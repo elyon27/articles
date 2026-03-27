@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Article Upload</title>
+  <style>
+    :root{
+      --bg:#0f1115;
+      --panel:#171a21;
+      --panel-2:#1e232d;
+      --text:#f3f5f7;
+      --muted:#a5afbd;
+      --accent:#d4af37;
+      --danger:#ff6b6b;
+      --ok:#2ecc71;
+      --border:#2a3140;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(180deg, #0b0d12 0%, #11151d 100%);
+      color: var(--text);
+      max-width: 860px;
+      margin: 40px auto;
+      padding: 0 16px 40px;
+    }
+    .card {
+      background: rgba(23, 26, 33, 0.96);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+    }
+    h1 { margin-top: 0; margin-bottom: 8px; font-size: 32px; }
+    .hint { color: var(--muted); font-size: 14px; line-height: 1.5; margin-bottom: 18px; }
+    form { display: grid; gap: 14px; }
+    label { display: grid; gap: 8px; font-size: 14px; color: var(--muted); }
+    input, textarea, button, select {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 15px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      color: var(--text);
+      outline: none;
+    }
+    textarea { min-height: 120px; resize: vertical; }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.14);
+    }
+    button {
+      cursor: pointer;
+      background: linear-gradient(180deg, #d7b64b 0%, #b98e20 100%);
+      color: #111;
+      font-weight: 700;
+      border: none;
+    }
+    button[disabled] {
+      opacity: .7;
+      cursor: wait;
+    }
+    .row { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
+    .config {
+      margin-bottom: 20px;
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px dashed #59481a;
+      background: rgba(212, 175, 55, 0.08);
+    }
+    .config h2 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      color: var(--accent);
+    }
+    .small {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    #status {
+      white-space: pre-wrap;
+      background: #0c1017;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      color: #dce4ee;
+      min-height: 84px;
+    }
+    .success { color: #b8f5cf; }
+    .error { color: #ffc2c2; }
+    @media (max-width: 700px) {
+      .row { grid-template-columns: 1fr; }
+      body { margin-top: 20px; }
+      h1 { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Upload Article</h1>
+    <p class="hint">
+      This form uploads the PDF and cover image into Supabase Storage, then inserts the article record into your
+      <code>articles</code> table automatically.
+    </p>
+
+    <div class="config">
+      <h2>Before you use this form</h2>
+      <div class="small">
+        1. Replace <code>YOUR_SUPABASE_URL</code> and <code>YOUR_SUPABASE_ANON_KEY</code> inside the script.<br>
+        2. Make sure your table is named <code>articles</code>.<br>
+        3. Make sure your buckets exist: <code>article-pdfs</code> and <code>article-covers</code>.<br>
+        4. Make sure your RLS policies allow your logged-in admin to upload files and insert rows.
+      </div>
+    </div>
+
+    <form id="articleForm">
+      <label>
+        Article title
+        <input id="title" placeholder="Article title" required />
+      </label>
+
+      <label>
+        Description
+        <textarea id="description" placeholder="Description"></textarea>
+      </label>
+
+      <label>
+        Short excerpt
+        <input id="excerpt" placeholder="Short excerpt" />
+      </label>
+
+      <div class="row">
+        <label>
+          Categories
+          <input id="categories" placeholder="Categories separated by commas" />
+        </label>
+
+        <label>
+          Tags
+          <input id="tags" placeholder="Tags separated by commas" />
+        </label>
+      </div>
+
+      <div class="row">
+        <label>
+          Publish now
+          <select id="isPublished">
+            <option value="true" selected>Yes</option>
+            <option value="false">No</option>
+          </select>
+        </label>
+
+        <label>
+          Custom slug (optional)
+          <input id="slug" placeholder="leave blank to auto-generate" />
+        </label>
+      </div>
+
+      <div class="row">
+        <label>
+          PDF file
+          <input id="pdfFile" type="file" accept="application/pdf" required />
+        </label>
+
+        <label>
+          Cover image
+          <input id="coverFile" type="file" accept="image/png,image/jpeg,image/webp" />
+        </label>
+      </div>
+
+      <button id="submitBtn" type="submit">Upload Article</button>
+    </form>
+
+    <pre id="status">Ready.</pre>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+    // ==========================
+    // SUPABASE PROJECT SETTINGS
+    // ==========================
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+    // ==========================
+    // APP SETTINGS
+    // ==========================
+    const ARTICLES_TABLE = 'articles';
+    const PDF_BUCKET = 'article-pdfs';
+    const COVER_BUCKET = 'article-covers';
+
+    const form = document.getElementById('articleForm');
+    const status = document.getElementById('status');
+    const submitBtn = document.getElementById('submitBtn');
+
+    if (
+      !SUPABASE_URL ||
+      !SUPABASE_ANON_KEY ||
+      SUPABASE_URL === 'YOUR_SUPABASE_URL' ||
+      SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY'
+    ) {
+      status.textContent = 'Set your SUPABASE_URL and SUPABASE_ANON_KEY in the script before using this page.';
+    }
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function slugify(value) {
+      return String(value || '')
+        .toLowerCase()
+        .trim()
+        .replace(/["']/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    }
+
+    function splitCsv(value) {
+      return String(value || '')
+        .split(',')
+        .map(v => v.trim())
+        .filter(Boolean);
+    }
+
+    function extFromName(fileName = '') {
+      const parts = fileName.split('.');
+      return parts.length > 1 ? parts.pop().toLowerCase() : '';
+    }
+
+    async function uploadFile(bucket, path, file) {
+      const { error } = await supabase.storage.from(bucket).upload(path, file, {
+        cacheControl: '3600',
+        contentType: file.type || undefined,
+        upsert: false
+      });
+
+      if (error) throw error;
+
+      const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+      return {
+        path,
+        url: data?.publicUrl || null
+      };
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      try {
+        submitBtn.disabled = true;
+        status.className = '';
+        status.textContent = 'Uploading files and saving article record...';
+
+        const title = document.getElementById('title').value.trim();
+        const description = document.getElementById('description').value.trim();
+        const excerpt = document.getElementById('excerpt').value.trim();
+        const categories = splitCsv(document.getElementById('categories').value);
+        const tags = splitCsv(document.getElementById('tags').value);
+        const pdfFile = document.getElementById('pdfFile').files[0];
+        const coverFile = document.getElementById('coverFile').files[0] || null;
+        const isPublished = document.getElementById('isPublished').value === 'true';
+        const customSlug = document.getElementById('slug').value.trim();
+
+        if (!title) throw new Error('Article title is required.');
+        if (!pdfFile) throw new Error('PDF file is required.');
+
+        const slug = customSlug ? slugify(customSlug) : slugify(title);
+        if (!slug) throw new Error('Could not generate a valid slug.');
+
+        const timestamp = Date.now();
+        const pdfExt = extFromName(pdfFile.name) || 'pdf';
+        const pdfPath = `articles/${slug}-${timestamp}.${pdfExt}`;
+
+        let coverUpload = null;
+        if (coverFile) {
+          const coverExt = extFromName(coverFile.name) || 'png';
+          const coverPath = `covers/${slug}-${timestamp}.${coverExt}`;
+          status.textContent = 'Uploading cover image...';
+          coverUpload = await uploadFile(COVER_BUCKET, coverPath, coverFile);
+        }
+
+        status.textContent = 'Uploading PDF file...';
+        const pdfUpload = await uploadFile(PDF_BUCKET, pdfPath, pdfFile);
+
+        const payload = {
+          title,
+          slug,
+          description,
+          excerpt,
+          categories,
+          tags,
+          pdf_path: pdfUpload.path,
+          pdf_url: pdfUpload.url,
+          cover_path: coverUpload?.path || null,
+          cover_url: coverUpload?.url || null,
+          is_published: isPublished
+        };
+
+        status.textContent = 'Saving article record to database...';
+
+        const { data, error } = await supabase
+          .from(ARTICLES_TABLE)
+          .insert(payload)
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        status.className = 'success';
+        status.textContent = `Article uploaded successfully.\n\nStored record:\n${JSON.stringify(data, null, 2)}`;
+
+        form.reset();
+      } catch (error) {
+        status.className = 'error';
+        status.textContent = `Upload failed:\n\n${error.message || error}`;
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
