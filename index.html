@@ -664,7 +664,16 @@
     actions.appendChild(meta);
     content.appendChild(actions);
 
+    // Create date element
+    const dateEl = document.createElement("div");
+    dateEl.className = "small";
+    dateEl.style.padding = "8px 14px 0";
+    dateEl.style.color = "var(--muted)";
+    dateEl.textContent = item.date ? item.date : "No date available";
+
+    // Append elements in correct order
     card.appendChild(thumb);
+    card.appendChild(dateEl);
     card.appendChild(content);
 
     return card;
