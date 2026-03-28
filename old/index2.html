@@ -428,7 +428,8 @@
   <section class="new-articles" aria-labelledby="new-articles-title">
     <div class="new-articles-head">
       <div>
-        <h2 id="new-articles-title" class="new-articles-title">5 New Added Article Files</h2>
+        <h2 id="new-articles-title" class="new-articles-title">5 Newly Added Article Files</h2>
+        <p class="new-articles-subtitle">This section automatically displays the latest five entries based on the highest article number.</p>
       </div>
     </div>
     <ul id="new-articles-list" class="new-articles-list"></ul>
@@ -540,25 +541,21 @@
     applyFilter();
   }
 
-  function getOldestArticles(sourceList, limit = 5) {
+  function getLatestArticles(sourceList, limit = 5) {
     return [...sourceList]
-      .sort((a, b) => {
-        const aNum = Number(a.number) || 0;
-        const bNum = Number(b.number) || 0;
-        return aNum - bNum;
-      })
+      .sort((a, b) => (Number(b.number) || 0) - (Number(a.number) || 0))
       .slice(0, limit);
   }
 
   function renderNewArticles(sourceList) {
     if (!newArticlesListEl) return;
-    const oldest = getOldestArticles(sourceList, 5);
-    if (!oldest.length) {
-      newArticlesListEl.innerHTML = '<li class="new-articles-item"><div class="new-articles-link">No article files available yet.</div></li>';
+    const latest = getLatestArticles(sourceList, 5);
+    if (!latest.length) {
+      newArticlesListEl.innerHTML = '<li class="new-articles-item"><div class="new-articles-link">No new article files available yet.</div></li>';
       return;
     }
 
-    newArticlesListEl.innerHTML = oldest.map((item, index) => {
+    newArticlesListEl.innerHTML = latest.map((item, index) => {
       const file = item.file || "Untitled.pdf";
       const href = PDF_DIR + file;
       return `
