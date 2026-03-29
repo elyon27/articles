@@ -1,0 +1,865 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Articles</title>
+  <meta name="description" content="Articles library" />
+
+  <link rel="stylesheet" href="assets/css/style.css" />
+
+  <style>
+    :root{
+      --bg:#070b12;
+      --card:#0e1422;
+      --text:#e9eefc;
+      --muted:#b8c2dd;
+      --line:rgba(255,255,255,.10);
+      --gold:#d8b46a;
+    }
+    body{
+      margin:0;
+      background: radial-gradient(1200px 700px at 20% 10%, rgba(216,180,106,.10), transparent 60%),
+                  radial-gradient(900px 600px at 90% 0%, rgba(90,160,255,.10), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    main{
+      max-width:1100px;
+      margin:0 auto;
+      padding:28px 16px 64px;
+    }
+
+    .page-head{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:16px;
+      margin:6px 0 18px;
+      padding-bottom:14px;
+      border-bottom:1px solid var(--line);
+    }
+    .page-head h1{
+      margin:0;
+      font-size:28px;
+      letter-spacing:.2px;
+    }
+    .page-head p{
+      margin:6px 0 0;
+      color:var(--muted);
+      max-width:70ch;
+      line-height:1.5;
+    }
+
+    .new-articles{
+      margin:0 0 18px;
+      padding:18px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      box-shadow:0 10px 30px rgba(0,0,0,.22);
+    }
+    .new-articles-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
+      flex-wrap:wrap;
+    }
+    .new-articles-title{
+      margin:0;
+      font-size:18px;
+      color:var(--gold);
+      letter-spacing:.2px;
+    }
+    .new-articles-subtitle{
+      margin:4px 0 0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.5;
+    }
+    .new-articles-list{
+      list-style:none;
+      margin:0;
+      padding:0;
+      display:grid;
+      grid-template-columns:repeat(5, minmax(0, 1fr));
+      gap:10px;
+    }
+    .new-articles-item{
+      min-height:58px;
+    }
+    .new-articles-link{
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      width:100%;
+      height:100%;
+      text-decoration:none;
+      color:var(--text);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:14px;
+      padding:12px;
+      background:rgba(255,255,255,.04);
+      transition:transform .12s ease, background .12s ease, border-color .12s ease;
+      box-sizing:border-box;
+    }
+    .new-articles-link:hover{
+      transform:translateY(-1px);
+      background:rgba(255,255,255,.08);
+      border-color:rgba(216,180,106,.4);
+    }
+    .new-articles-index{
+      flex:0 0 auto;
+      width:24px;
+      height:24px;
+      display:grid;
+      place-items:center;
+      border-radius:999px;
+      background:rgba(216,180,106,.14);
+      border:1px solid rgba(216,180,106,.28);
+      color:var(--gold);
+      font-size:12px;
+      font-weight:700;
+      margin-top:1px;
+    }
+    .new-articles-name{
+      display:block;
+      font-size:13px;
+      line-height:1.45;
+      word-break:break-word;
+    }
+
+    .toolbar{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .search{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:10px 12px;
+      min-width:260px;
+    }
+    .search input{
+      width:100%;
+      border:0;
+      outline:0;
+      background:transparent;
+      color:var(--text);
+      font-size:14px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0,1fr));
+      gap:14px;
+      margin-top:16px;
+    }
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .new-articles-list{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 640px){
+      .page-head{ flex-direction:column; align-items:flex-start; }
+      .toolbar{ width:100%; }
+      .search{ width:100%; min-width:0; }
+      .count-chip, .category-group{ width:100%; }
+      .category-group{ justify-content:flex-start; }
+      .grid{ grid-template-columns:1fr; }
+      .new-articles-list{ grid-template-columns:1fr; }
+    }
+
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid var(--line);
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow:0 10px 30px rgba(0,0,0,.25);
+      display:flex;
+      flex-direction:column;
+      min-height:320px;
+    }
+
+    .thumb{
+      position:relative;
+      aspect-ratio:16 / 10;
+      background:rgba(0,0,0,.25);
+      border-bottom:1px solid var(--line);
+      display:grid;
+      place-items:center;
+    }
+    .thumb img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    .thumb .fallback{
+      width:92%;
+      height:82%;
+      border-radius:14px;
+      border:1px dashed rgba(255,255,255,.22);
+      display:grid;
+      place-items:center;
+      color:var(--muted);
+      text-align:center;
+      padding:10px;
+    }
+    .badge{
+      position:absolute;
+      top:10px;
+      left:10px;
+      background:rgba(0,0,0,.55);
+      border:1px solid rgba(255,255,255,.16);
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      color:var(--gold);
+      backdrop-filter:blur(6px);
+    }
+
+    .content{
+      padding:14px 14px 16px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      flex:1;
+    }
+    .title{
+      margin:0;
+      font-size:16px;
+      line-height:1.25;
+      letter-spacing:.2px;
+    }
+    .desc{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.45;
+      flex:1;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      margin-top:4px;
+      flex-wrap:wrap;
+    }
+
+    .article-links{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:10px;
+      width:100%;
+    }
+
+    .flag-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .flag-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:44px;
+      height:44px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.06);
+      text-decoration:none;
+      font-size:22px;
+      line-height:1;
+      transition:transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+
+    .flag-btn:hover{
+      transform:translateY(-1px);
+      background:rgba(255,255,255,.10);
+      border-color:rgba(216,180,106,.55);
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border-radius:999px;
+      padding:10px 12px;
+      text-decoration:none;
+      font-weight:600;
+      font-size:13px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.06);
+      color:var(--text);
+      transition:transform .12s ease, background .12s ease, border-color .12s ease;
+      white-space:nowrap;
+    }
+    .btn:hover{
+      transform:translateY(-1px);
+      background:rgba(255,255,255,.10);
+      border-color:rgba(216,180,106,.55);
+    }
+    .btn .icon{
+      display:inline-grid;
+      place-items:center;
+      width:22px;
+      height:22px;
+      border-radius:999px;
+      background:rgba(216,180,106,.14);
+      border:1px solid rgba(216,180,106,.28);
+      color:var(--gold);
+      font-size:12px;
+    }
+
+    .small{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .count-chip,
+    .category-chip{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      min-height:42px;
+      padding:0 14px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.06);
+      color:var(--text);
+      white-space:nowrap;
+    }
+
+    .count-chip{
+      box-shadow:0 0 0 rgba(216,180,106,0);
+      animation:countGlow 2.8s ease-in-out infinite;
+    }
+
+    button.count-chip,
+    button.category-chip{
+      cursor:pointer;
+      font:inherit;
+    }
+
+    .count-chip strong,
+    .category-chip strong{
+      color:var(--gold);
+      font-weight:700;
+    }
+
+    .category-group{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .category-chip{
+      cursor:pointer;
+      transition:transform .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
+      user-select:none;
+    }
+    .category-chip:hover{
+      transform:translateY(-1px);
+      background:rgba(255,255,255,.10);
+      border-color:rgba(216,180,106,.36);
+    }
+    .category-chip.active{
+      background:rgba(216,180,106,.14);
+      border-color:rgba(216,180,106,.52);
+      box-shadow:0 0 18px rgba(216,180,106,.12);
+    }
+
+    .article-categories{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
+    .article-category{
+      display:inline-flex;
+      align-items:center;
+      min-height:28px;
+      padding:0 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.05);
+      color:var(--gold);
+      font-size:12px;
+      white-space:nowrap;
+    }
+
+    @keyframes countGlow {
+      0%, 100% {
+        box-shadow:0 0 0 rgba(216,180,106,0);
+        border-color:rgba(255,255,255,.12);
+      }
+      50% {
+        box-shadow:0 0 18px rgba(216,180,106,.18);
+        border-color:rgba(216,180,106,.36);
+      }
+    }
+
+    .empty{
+      margin-top:18px;
+      padding:16px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      color:var(--muted);
+      display:none;
+    }
+
+    .back-badge {
+      text-decoration:none;
+      font-weight:600;
+      letter-spacing:0.4px;
+      padding:8px 16px;
+      border-radius:8px;
+      background:rgba(255,255,255,0.08);
+      color:#e9eefc;
+      border:1px solid rgba(255,255,255,0.18);
+      transition:all 0.25s ease;
+    }
+
+    .back-badge:hover {
+      background:rgba(255,255,255,0.14);
+      border-color:rgba(255,255,255,0.35);
+      transform:translateY(-1px);
+    }
+  </style>
+</head>
+
+<body>
+<header class="site-header">
+  <div class="container navbar">
+    <a class="brand" href="https://crownmind.netlify.app" aria-label="CrownMind Institute Home">
+      <img src="assets/img/crownmindlogo.jpg" alt="CrownMind Institute Logo" class="brand-logo">
+      <span>CrownMind Institute</span>
+    </a>
+
+    <nav>
+      <div class="links" style="display:flex; gap:10px;">
+        <a href="https://crownmind-community.netlify.app/" class="back-badge">Community</a>
+        <a href="https://crownmind.netlify.app" class="back-badge">Back To Mission</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="new-articles" aria-labelledby="new-articles-title">
+    <div class="new-articles-head">
+      <div>
+        <h2 id="new-articles-title" class="new-articles-title">5 New Added Article Files</h2>
+      </div>
+    </div>
+    <ul id="new-articles-list" class="new-articles-list"></ul>
+  </section>
+
+  <div class="page-head">
+    <div class="toolbar">
+      <div class="search" aria-label="Search articles">
+        <span style="opacity:.8;">🔎</span>
+        <input id="q" type="search" placeholder="Search title…" autocomplete="off" />
+      </div>
+
+      <div id="article-count" class="count-chip small" aria-live="polite">
+        <strong>0</strong> Articles
+      </div>
+
+      <button type="button" id="category-total" class="count-chip small" aria-live="polite">
+        <strong>0</strong> Categories
+      </button>
+
+      <div class="category-group small" aria-label="Category breakdown">
+        <button type="button" id="count-doctrine-rev" class="category-chip" data-category="Doctrine & Revelation"><strong>0</strong> Doctrine & Revelation</button>
+        <button type="button" id="count-prophetic" class="category-chip" data-category="Prophetic Scrolls"><strong>0</strong> Prophetic Scrolls</button>
+        <button type="button" id="count-growth" class="category-chip" data-category="Spiritual Growth"><strong>0</strong> Spiritual Growth</button>
+        <button type="button" id="count-wisdom" class="category-chip" data-category="Wisdom & Character"><strong>0</strong> Wisdom & Character</button>
+        <button type="button" id="count-kingdom" class="category-chip" data-category="Kingdom Living"><strong>0</strong> Kingdom Living</button>
+      </div>
+    </div>
+  </div>
+
+  <section class="grid" id="grid" aria-live="polite"></section>
+  <div class="empty" id="empty"></div>
+</main>
+
+<script>
+  const PDF_DIR = "assets/articles/";
+  const TAGALOG_DIR = "assets/articles/Tagalog/";
+  const SPANISH_DIR = "assets/articles/Spanish/";
+  const COVERS_DIR = "assets/articles/covers/";
+  const MANIFEST = new URL("./assets/articles/articles.json", window.location.href).href;
+
+  const grid = document.getElementById("grid");
+  const empty = document.getElementById("empty");
+  const q = document.getElementById("q");
+  const countEl = document.getElementById("article-count");
+  const categoryTotalEl = document.getElementById("category-total");
+  const newArticlesListEl = document.getElementById("new-articles-list");
+
+  const countDoctrineRevEl = document.getElementById("count-doctrine-rev");
+  const countPropheticEl = document.getElementById("count-prophetic");
+  const countGrowthEl = document.getElementById("count-growth");
+  const countWisdomEl = document.getElementById("count-wisdom");
+  const countKingdomEl = document.getElementById("count-kingdom");
+  const categoryButtons = [countDoctrineRevEl, countPropheticEl, countGrowthEl, countWisdomEl, countKingdomEl].filter(Boolean);
+
+  let all = [];
+  let activeCategory = "";
+
+  function escapeHtml(s = "") {
+    return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  function baseName(filename) {
+    const i = filename.lastIndexOf(".");
+    return i >= 0 ? filename.slice(0, i) : filename;
+  }
+
+  function normalizeCategoryName(value = "") {
+    const raw = String(value).trim().toLowerCase();
+    const map = {
+      "doctrine": "Doctrine & Revelation",
+      "doctrine & revelation": "Doctrine & Revelation",
+      "prophetic": "Prophetic Scrolls",
+      "prophetic scrolls": "Prophetic Scrolls",
+      "scroll": "Prophetic Scrolls",
+      "scrolls": "Prophetic Scrolls",
+      "spiritual growth": "Spiritual Growth",
+      "growth": "Spiritual Growth",
+      "wisdom": "Wisdom & Character",
+      "wisdom & character": "Wisdom & Character",
+      "character": "Wisdom & Character",
+      "kingdom": "Kingdom Living",
+      "kingdom living": "Kingdom Living"
+    };
+    return map[raw] || String(value).trim();
+  }
+
+  function getCategories(item) {
+    if (Array.isArray(item.categories) && item.categories.length) {
+      return [...new Set(item.categories.map(normalizeCategoryName).filter(Boolean))];
+    }
+    if (typeof item.tag === "string" && item.tag.trim()) {
+      return [normalizeCategoryName(item.tag)];
+    }
+    return ["Spiritual Growth"];
+  }
+
+  function syncActiveCategoryButtons() {
+    categoryButtons.forEach(btn => btn.classList.toggle("active", btn.dataset.category === activeCategory));
+  }
+
+  function setActiveCategory(category = "") {
+    activeCategory = activeCategory === category ? "" : category;
+    syncActiveCategoryButtons();
+    applyFilter();
+  }
+
+  function showAllArticles() {
+    activeCategory = "";
+    syncActiveCategoryButtons();
+    applyFilter();
+  }
+
+  function getOldestArticles(sourceList, limit = 5) {
+    return [...sourceList]
+      .sort((a, b) => {
+        const aNum = Number(a.number) || 0;
+        const bNum = Number(b.number) || 0;
+        return aNum - bNum;
+      })
+      .slice(0, limit);
+  }
+
+  function renderNewArticles(sourceList) {
+    if (!newArticlesListEl) return;
+    const oldest = getOldestArticles(sourceList, 5);
+    if (!oldest.length) {
+      newArticlesListEl.innerHTML = '<li class="new-articles-item"><div class="new-articles-link">No article files available yet.</div></li>';
+      return;
+    }
+
+    newArticlesListEl.innerHTML = oldest.map((item, index) => {
+      const file = item.file || "Untitled.pdf";
+      const href = PDF_DIR + file;
+      return `
+        <li class="new-articles-item">
+          <div class="new-articles-link" style="opacity:1.0; cursor:not-allowed;">
+            <span class="new-articles-index">${index + 1}</span>
+            <span class="new-articles-name">${escapeHtml(file)}</span>
+          </div>
+        </li>
+      `;
+    }).join("");
+  }
+
+  function buildCard(item) {
+    const title = item.title || baseName(item.file || "Untitled");
+    const file = item.file;
+    const desc = item.description || "PDF article";
+    const categories = getCategories(item);
+    const pdfHref = PDF_DIR + file;
+    const tagalogHref = TAGALOG_DIR + (item.tagalogFile || file);
+    const spanishHref = SPANISH_DIR + (item.spanishFile || file);
+
+    const coverCandidates = [];
+    if (item.cover) coverCandidates.push(COVERS_DIR + item.cover);
+
+    const name = baseName(file);
+    coverCandidates.push(
+      COVERS_DIR + name + ".jpg",
+      COVERS_DIR + name + ".png",
+      COVERS_DIR + name + ".webp",
+      COVERS_DIR + name + ".jpeg"
+    );
+
+    const card = document.createElement("article");
+    card.className = "card";
+
+    const thumb = document.createElement("div");
+    thumb.className = "thumb";
+
+    const img = document.createElement("img");
+    img.alt = title + " cover";
+    img.loading = "lazy";
+
+    const fallback = document.createElement("div");
+    fallback.className = "fallback";
+    fallback.innerHTML = `
+      <div>
+        <div style="font-size:34px; line-height:1;">📄</div>
+        <div style="margin-top:8px;">No cover image</div>
+        <div style="margin-top:4px; font-size:12px; opacity:.9;">Add: <b>assets/articles/covers/${escapeHtml(name)}.jpg</b></div>
+      </div>
+    `;
+
+    let tried = 0;
+    function tryNextCover() {
+      if (tried >= coverCandidates.length) {
+        if (!thumb.contains(fallback)) thumb.appendChild(fallback);
+        return;
+      }
+      img.src = coverCandidates[tried++];
+    }
+
+    img.onerror = tryNextCover;
+    img.onload = () => {
+      if (thumb.contains(fallback)) fallback.remove();
+    };
+    tryNextCover();
+
+    thumb.appendChild(img);
+
+    const numberBadge = document.createElement("button");
+    numberBadge.className = "badge article-number";
+    numberBadge.type = "button";
+    numberBadge.textContent = "#" + (item.number ?? "");
+    thumb.appendChild(numberBadge);
+
+    const content = document.createElement("div");
+    content.className = "content";
+
+    const categoriesHtml = categories
+      .map(cat => `<span class="article-category">${escapeHtml(cat)}</span>`)
+      .join("");
+
+    content.innerHTML = `
+      <h3 class="title">${escapeHtml(title)}</h3>
+      <div class="article-categories">${categoriesHtml}</div>
+      <p class="desc">${escapeHtml(desc)}</p>
+    `;
+
+    const actions = document.createElement("div");
+    actions.className = "actions";
+
+    const articleLinks = document.createElement("div");
+    articleLinks.className = "article-links";
+
+    const readBtn = document.createElement("span");
+    readBtn.className = "btn";
+    readBtn.style.opacity = "0.5";
+    readBtn.style.cursor = "not-allowed";
+    readBtn.innerHTML = `<span class="icon">📖</span> Read Article`;
+
+    const flagActions = document.createElement("div");
+    flagActions.className = "flag-actions";
+
+    const americanBtn = document.createElement("a");
+    americanBtn.className = "flag-btn";
+    americanBtn.href = pdfHref;
+    americanBtn.target = "_blank";
+    americanBtn.rel = "noopener";
+    americanBtn.setAttribute("aria-label", `Read ${title} in English`);
+    americanBtn.title = "Read English article";
+    americanBtn.textContent = "🇺🇸";
+
+    const philippinesBtn = document.createElement("a");
+    philippinesBtn.className = "flag-btn";
+    philippinesBtn.href = tagalogHref;
+    philippinesBtn.target = "_blank";
+    philippinesBtn.rel = "noopener";
+    philippinesBtn.setAttribute("aria-label", `Read ${title} in Tagalog`);
+    philippinesBtn.title = "Read Tagalog article";
+    philippinesBtn.textContent = "🇵🇭";
+
+    const spainBtn = document.createElement("a");
+    spainBtn.className = "flag-btn";
+    spainBtn.href = spanishHref;
+    spainBtn.target = "_blank";
+    spainBtn.rel = "noopener";
+    spainBtn.setAttribute("aria-label", `Read ${title} in Spanish`);
+    spainBtn.title = "Read Spanish article";
+    spainBtn.textContent = "🇪🇸";
+
+    flagActions.appendChild(americanBtn);
+    flagActions.appendChild(philippinesBtn);
+    flagActions.appendChild(spainBtn);
+    articleLinks.appendChild(readBtn);
+    articleLinks.appendChild(flagActions);
+
+    const meta = document.createElement("span");
+    meta.className = "small";
+    meta.textContent = file;
+
+    actions.appendChild(articleLinks);
+    actions.appendChild(meta);
+    content.appendChild(actions);
+
+    // Create date element
+    const dateEl = document.createElement("div");
+    dateEl.className = "small";
+    dateEl.style.padding = "8px 14px 0";
+    dateEl.style.color = "var(--muted)";
+    dateEl.textContent = item.date ? item.date : "No date available";
+
+    // Append elements in correct order
+    card.appendChild(thumb);
+    card.appendChild(dateEl);
+    card.appendChild(content);
+
+    return card;
+  }
+
+  function updateCounts(sourceList) {
+    let totalCategoryCount = 0;
+    const counts = {
+      "Doctrine & Revelation": 0,
+      "Prophetic Scrolls": 0,
+      "Spiritual Growth": 0,
+      "Wisdom & Character": 0,
+      "Kingdom Living": 0
+    };
+
+    sourceList.forEach(item => {
+      const cats = getCategories(item);
+      totalCategoryCount += cats.length;
+      cats.forEach(cat => { if (counts[cat] !== undefined) counts[cat]++; });
+    });
+
+    if (countEl) countEl.innerHTML = `<strong>${sourceList.length}</strong> Article${sourceList.length !== 1 ? "s" : ""}`;
+    if (categoryTotalEl) categoryTotalEl.innerHTML = `<strong>${totalCategoryCount}</strong> Categories`;
+    if (countDoctrineRevEl) countDoctrineRevEl.innerHTML = `<strong>${counts["Doctrine & Revelation"]}</strong> Doctrine & Revelation`;
+    if (countPropheticEl) countPropheticEl.innerHTML = `<strong>${counts["Prophetic Scrolls"]}</strong> Prophetic Scrolls`;
+    if (countGrowthEl) countGrowthEl.innerHTML = `<strong>${counts["Spiritual Growth"]}</strong> Spiritual Growth`;
+    if (countWisdomEl) countWisdomEl.innerHTML = `<strong>${counts["Wisdom & Character"]}</strong> Wisdom & Character`;
+    if (countKingdomEl) countKingdomEl.innerHTML = `<strong>${counts["Kingdom Living"]}</strong> Kingdom Living`;
+  }
+
+  function render(list) {
+    grid.innerHTML = "";
+    list.forEach(item => grid.appendChild(buildCard(item)));
+    empty.style.display = list.length ? "none" : "block";
+    empty.innerHTML = list.length ? "" : "No articles matched your current search or category filter.";
+    updateCounts(all);
+    renderNewArticles(all);
+  }
+
+  function applyFilter() {
+    const term = (q.value || "").trim().toLowerCase();
+    const filtered = all.filter(a => {
+      const categories = getCategories(a);
+      const matchesCategory = !activeCategory || categories.includes(activeCategory);
+      if (!matchesCategory) return false;
+
+      if (!term) return true;
+      const t = (a.title || "").toLowerCase();
+      const d = (a.description || "").toLowerCase();
+      const f = (a.file || "").toLowerCase();
+      const c = categories.join(" ").toLowerCase();
+      return t.includes(term) || d.includes(term) || f.includes(term) || c.includes(term);
+    });
+    render(filtered);
+  }
+
+  async function loadManifest() {
+    try {
+      const res = await fetch(MANIFEST, { cache: "no-store" });
+      if (!res.ok) throw new Error("Manifest not found: " + MANIFEST);
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : (data.articles || []);
+      all = list
+        .filter(x => x && x.file)
+        .map((item, index) => ({
+          ...item,
+          number: item.number ?? index + 1
+        }));
+      applyFilter();
+    } catch (err) {
+      console.error("Manifest load failed:", err);
+      all = [
+        { title: "The Inner Sanctuary", file: "The Inner Sanctuary.pdf", description: "A profound reflection on the hidden chamber within every soul, The Inner Sanctuary unveils the sacred space where truth strips away illusion and the heart is restored to its original alignment. It explores the journey from inner chaos to divine stillness, revealing that true peace is not found outwardly, but in returning to the quiet place where the soul is made whole.", categories: ["Spiritual Growth", "Wisdom & Character", "Kingdom Living"] },
+        { title: "Brave New World", file: "Brave new World.pdf", description: "A profound reflection on a world that no longer enslaves through force, but through comfort, distraction, and illusion. Brave New World unveils the subtle shift from truth to convenience, urging the reader to awaken, discern, and return to the quiet voice that leads beyond deception.", categories: ["Doctrine & Revelation", "Prophetic Scrolls", "Wisdom & Character"] },
+        { title: "They Look But Not See", file: "They Look But Not See.pdf", description: "A man may observe everything around him yet remain blind to what truly matters. This article unveils the quiet tragedy of seeing without perceiving—where truth stands present, but the heart remains closed. It is a call to awaken the inner eye, to move beyond surface awareness into deep, transformative sight where reality is no longer merely observed, but truly understood.", categories: ["Wisdom & Character"] },
+        { title: "The Importance Of Vigilance", file: "The Importance Of Vigilance.pdf", description: "A watchful soul is a guarded soul. This article unveils the quiet power of vigilance—the discipline of remaining awake in a world that drifts into unconsciousness. It calls the reader to stand at the gate of their own life with clarity, discernment, and unwavering awareness, preserving truth, protecting purpose, and resisting the subtle forces that seek to erode what is sacred.", categories: ["Spiritual Growth", "Wisdom & Character", "Kingdom Living"] },
+        { title: "My Sheep Hear My Voice", file: "My Sheep Hear My Voice.pdf", description: "A quiet yet powerful reflection on the sacred recognition between the Shepherd and His own, this article unveils the deeper truth behind hearing beyond sound. It explores how true belonging is not taught but known, not forced but followed—revealing that amidst the noise of the world, there remains a voice that only the aligned heart can discern, trust, and obey.", categories: ["Doctrine & Revelation", "Spiritual Growth", "Kingdom Living"] },
+        { title: "I Am Who I Am", file: "I Am Who I Am.pdf", description: "“I Am Who I Am” is a profound exploration of identity beyond illusion—an unveiling of the eternal essence that exists apart from titles, past, and becoming. It invites the reader into a deeper encounter with truth itself: not as something to achieve, but as something ever-present, unchanging, and silently calling from within.", categories: ["Doctrine & Revelation"] },
+        { title: "Why Do You Call Me Lord?", file: "Why Call Me Lord.pdf", description: "“Why Do You Call Me Lord?” is a piercing and transformative reflection that confronts the quiet contradiction between confession and obedience. It unveils the deeper meaning behind the word Lord, revealing that true surrender is not spoken—but lived. This article calls the reader beyond empty reverence into a life of alignment, where the throne of the heart is no longer self-ruled, but yielded fully to truth.", categories: ["Doctrine & Revelation"] },
+        { title: "The 3 Witnesses (Spirit, Blood, Water)", file: "The 3 Witnesses.pdf", description: "The 3 Witnesses (Spirit, Blood, and Water) unveils a profound spiritual pattern that transcends doctrine and speaks directly to the soul. It reveals how truth is not merely spoken—but confirmed through divine alignment: the Spirit that inwardly knows, the Water that transforms, and the Blood that seals reality through sacrifice. This article invites the reader to recognize that true reality is not argued, but witnessed—within creation, within Christ, and within themselves.", categories: ["Doctrine & Revelation"] },
+        { title: "There Has Never Been Any Shades Of Gray", file: "Never Any Shades Of Gray.pdf", description: "A piercing reflection on truth and illusion, There Has Never Been Any Shades of Gray unveils the hidden cost of moral compromise and the quiet deception of “in-between” thinking. It calls the reader back to a place of inner clarity—where truth stands undivided, choices are unmistakable, and the soul is invited to walk the narrow path between light and darkness with unwavering conviction.", categories: ["Doctrine & Revelation", "Wisdom & Character"] },
+        { title: "Seizing The Kingdom: Why violent men try to seize the kingdom", file: "Seizing The Kingdom.pdf", description: "A profound exploration of the hidden tension between force and surrender, Seizing The Kingdom unveils why men, driven by a deep spiritual hunger, attempt to grasp what can only be received. It reveals that the true battle is not outward conquest, but inward transformation—where the ego resists, yet the soul longs to yield. In the end, the kingdom is not taken by strength, but revealed through surrender.", categories: ["Spiritual Growth", "Kingdom Living"] },
+        { title: "Freedom Syndrome", file: "Freedom Syndrome.pdf", description: "Freedom Syndrome explores the hidden paradox of liberation—the unsettling reality that true freedom can feel overwhelming when the soul is unprepared for it. The article reflects on how the absence of structure can lead to confusion, drift, or inner emptiness, and reveals that genuine freedom is not found in limitless choices, but in alignment with truth, purpose, and inner discipline. It is a profound invitation to move beyond mere escape and into a deeper, anchored form of being.", categories: ["Spiritual Growth"] },
+        { title: "Tuning The Mind", file: "Tuning The Mind.pdf", description: "A profound reflection on the art of inner alignment, Tuning the Mind explores how clarity, peace, and truth emerge not through control, but through conscious awareness and intentional focus. It invites the reader to quiet the noise, refine their inner frequency, and rediscover the still, powerful center within.", categories: ["Spiritual Growth"] },
+        { title: "The Kingdom Within", file: "The Kingdom Within.pdf", description: "A quiet revelation unfolds: the Kingdom we seek is not beyond us, but within. In stillness, beneath the noise of the world, we rediscover a divine presence that has always been whole—waiting not to be found, but to be realized.", categories: ["Doctrine & Revelation"] },
+        { title: "The Power Of Love", file: "The Power Of Love.pdf", description: "Love is not merely an emotion—it is a transformative force that reshapes the human soul. This article explores love as a quiet strength, a mirror of truth, and a refining fire that calls us beyond ego into deeper alignment. In choosing love, even when it is difficult, we discover not only connection with others—but the unfolding of our highest self.", categories: ["Doctrine & Revelation"] },
+        { title: "Setting Boundaries", file: "Setting Boundaries.pdf", description: "A powerful reflection on the unseen cost of people-pleasing, Setting Boundaries challenges the belief that endless giving is a virtue. It reveals how the absence of limits leads to self-abandonment, and how reclaiming one’s inner space is an act of truth, not selfishness. With quiet intensity, the article invites readers to draw sacred lines—not to shut others out, but to finally return to themselves.", categories: ["Wisdom & Character"] },
+        { title: "Cry Of The Watchers", file: "Cry Of The Watchers.pdf", description: "A prophetic call to spiritual remembrance, this article declares the awakening of the Watchers and the convergence of the elect in the final hour of divine unveiling", categories: ["Prophetic Scrolls"] },
+        { title: "The Refining Fire", file: "The Refining Fire.pdf", description: "A prophetic reflection on divine purification, this article portrays the Refining Fire as God’s transforming process through which the Elect are cleansed, tested, and made vessels of eternal light", categories: ["Prophetic Scrolls"] },
+        { title: "God Gives His Hardest Battles To His Strongest Soldiers", file: "God's Hardest Battles.pdf", description: "This article affirms that life’s hardest trials are divine assignments meant to refine, strengthen, and prepare God’s chosen soldiers for higher purpose and eternal victory", categories: ["Spiritual Growth"] },
+        { title: "Children Of The Lamb", file: "Children of the Lamb.pdf", description: "Children of the Lamb is a profound Christian reflection on the believer’s identity in Christ, emphasizing faith, purity, sacrificial love, and the eternal hope found in Jesus, the Lamb of God.", categories: ["Prophetic Scrolls", "Doctrine & Revelation"] },
+        { title: "Thorn In The Flesh", file: "Thorn in the Flesh.pdf", description: "Thorn in the Flesh - is a profound Christian and mystical reflection on how suffering, weakness, and inner struggle become instruments of humility, spiritual transformation, and deeper reliance on God’s sufficient grace.", categories: ["Spiritual Growth"] },
+        { title: "When You Are Misunderstood And Falsely Accused", file: "When You Are Misunderstood.pdf", description: "When You Are Misunderstood and Falsely Accused - is a reflective spiritual meditation on enduring injustice with inner strength, integrity, and trust in God, revealing how false accusations refine character rather than define identity.", categories: ["Spiritual Growth", "Wisdom & Character"] },
+        { title: "Manifesting Wealth And Riches Through Inner Alignment", file: "Manifesting Wealth And Riches.pdf", description: "Manifesting Wealth and Riches - teaches that lasting abundance flows not from chasing money, but from aligning one’s inner life—values, integrity, purpose, and stillness—so that wealth becomes a natural byproduct of coherence and stewardship.", categories: ["Kingdom Living"] },
+        { title: "Faithful Without Fandom - Faith Without Compromise in Leadership", file: "Faithful Without Fandom.pdf", description: "Faithful Without Fandom - is a principled reflection on maintaining moral discernment, clean conscience, and spiritual integrity under flawed political leadership without idolizing power or compromising faith.", categories: ["Kingdom Living"] },
+        { title: "Change Your Input Change Your World", file: "Change Your Input Change Your World.pdf", description: "Change Your Input, Change Your World - explores how the thoughts, information, and narratives we repeatedly consume shape our perception of reality, teaching that deliberate mental alignment transforms both inner life and outer experience.", categories: ["Kingdom Living"] },
+        { title: "When Silence Is Strength: Choosing Dignity Over Reaction", file: "When Silence Is Strength.pdf", description: "This article teaches that choosing silence over reaction is a disciplined act of dignity and inner strength that preserves peace and protects the integrity of the soul.", categories: ["Wisdom & Character"] }
+      ];
+      applyFilter();
+    }
+  }
+
+  q.addEventListener("input", applyFilter);
+  if (categoryTotalEl) {
+    categoryTotalEl.addEventListener("click", showAllArticles);
+  }
+  categoryButtons.forEach(btn => btn.addEventListener("click", () => setActiveCategory(btn.dataset.category)));
+  loadManifest();
+</script>
+</body>
+</html>
