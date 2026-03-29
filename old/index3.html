@@ -254,42 +254,6 @@
       align-items:center;
       justify-content:space-between;
       margin-top:4px;
-      flex-wrap:wrap;
-    }
-
-    .article-links{
-      display:flex;
-      flex-direction:column;
-      align-items:flex-start;
-      gap:10px;
-      width:100%;
-    }
-
-    .flag-actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .flag-btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      width:44px;
-      height:44px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.18);
-      background:rgba(255,255,255,.06);
-      text-decoration:none;
-      font-size:22px;
-      line-height:1;
-      transition:transform .12s ease, background .12s ease, border-color .12s ease;
-    }
-
-    .flag-btn:hover{
-      transform:translateY(-1px);
-      background:rgba(255,255,255,.10);
-      border-color:rgba(216,180,106,.55);
     }
     .btn{
       display:inline-flex;
@@ -501,7 +465,6 @@
 
 <script>
   const PDF_DIR = "assets/articles/";
-  const TAGALOG_DIR = "assets/articles/Tagalog/";
   const COVERS_DIR = "assets/articles/covers/";
   const MANIFEST = new URL("./assets/articles/articles.json", window.location.href).href;
 
@@ -615,7 +578,6 @@
     const desc = item.description || "PDF article";
     const categories = getCategories(item);
     const pdfHref = PDF_DIR + file;
-    const tagalogHref = TAGALOG_DIR + (item.tagalogFile || file);
 
     const coverCandidates = [];
     if (item.cover) coverCandidates.push(COVERS_DIR + item.cover);
@@ -687,46 +649,18 @@
     const actions = document.createElement("div");
     actions.className = "actions";
 
-    const articleLinks = document.createElement("div");
-    articleLinks.className = "article-links";
-
-    const readBtn = document.createElement("span");
+    const readBtn = document.createElement("a");
     readBtn.className = "btn";
-    readBtn.style.opacity = "0.5";
-    readBtn.style.cursor = "not-allowed";
+    readBtn.href = pdfHref;
+    readBtn.target = "_blank";
+    readBtn.rel = "noopener";
     readBtn.innerHTML = `<span class="icon">📖</span> Read Article`;
-
-    const flagActions = document.createElement("div");
-    flagActions.className = "flag-actions";
-
-    const americanBtn = document.createElement("a");
-    americanBtn.className = "flag-btn";
-    americanBtn.href = pdfHref;
-    americanBtn.target = "_blank";
-    americanBtn.rel = "noopener";
-    americanBtn.setAttribute("aria-label", `Read ${title} in English`);
-    americanBtn.title = "Read English article";
-    americanBtn.textContent = "🇺🇸";
-
-    const philippinesBtn = document.createElement("a");
-    philippinesBtn.className = "flag-btn";
-    philippinesBtn.href = tagalogHref;
-    philippinesBtn.target = "_blank";
-    philippinesBtn.rel = "noopener";
-    philippinesBtn.setAttribute("aria-label", `Read ${title} in Tagalog`);
-    philippinesBtn.title = "Read Tagalog article";
-    philippinesBtn.textContent = "🇵🇭";
-
-    flagActions.appendChild(americanBtn);
-    flagActions.appendChild(philippinesBtn);
-    articleLinks.appendChild(readBtn);
-    articleLinks.appendChild(flagActions);
 
     const meta = document.createElement("span");
     meta.className = "small";
     meta.textContent = file;
 
-    actions.appendChild(articleLinks);
+    actions.appendChild(readBtn);
     actions.appendChild(meta);
     content.appendChild(actions);
 
