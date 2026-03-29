@@ -502,6 +502,7 @@
 <script>
   const PDF_DIR = "assets/articles/";
   const TAGALOG_DIR = "assets/articles/Tagalog/";
+  const SPANISH_DIR = "assets/articles/Spanish/";
   const COVERS_DIR = "assets/articles/covers/";
   const MANIFEST = new URL("./assets/articles/articles.json", window.location.href).href;
 
@@ -616,6 +617,7 @@
     const categories = getCategories(item);
     const pdfHref = PDF_DIR + file;
     const tagalogHref = TAGALOG_DIR + (item.tagalogFile || file);
+    const spanishHref = SPANISH_DIR + (item.spanishFile || file);
 
     const coverCandidates = [];
     if (item.cover) coverCandidates.push(COVERS_DIR + item.cover);
@@ -717,8 +719,18 @@
     philippinesBtn.title = "Read Tagalog article";
     philippinesBtn.textContent = "🇵🇭";
 
+    const spainBtn = document.createElement("a");
+    spainBtn.className = "flag-btn";
+    spainBtn.href = spanishHref;
+    spainBtn.target = "_blank";
+    spainBtn.rel = "noopener";
+    spainBtn.setAttribute("aria-label", `Read ${title} in Spanish`);
+    spainBtn.title = "Read Spanish article";
+    spainBtn.textContent = "🇪🇸";
+
     flagActions.appendChild(americanBtn);
     flagActions.appendChild(philippinesBtn);
+    flagActions.appendChild(spainBtn);
     articleLinks.appendChild(readBtn);
     articleLinks.appendChild(flagActions);
 
