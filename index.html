@@ -12,12 +12,6 @@
   gtag('config', 'G-LDCFFFKY5Y');
 </script>
 
-gtag("event", "article_click", {
-  article_title: title,
-  category: category,
-  source: "crown-articles"
-});
-
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Articles</title>
@@ -480,6 +474,11 @@ gtag("event", "article_click", {
 </head>
 
 <body>
+gtag("event", "article_click", {
+  article_title: title,
+  category: category,
+  source: "crown-articles"
+});
 <header class="site-header">
   <div class="container navbar">
     <a class="brand" href="https://crownmind.netlify.app" aria-label="CrownMind Institute Home">
