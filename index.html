@@ -608,13 +608,23 @@
   function setActiveCategory(category = "") {
     activeCategory = activeCategory === category ? "" : category;
     syncActiveCategoryButtons();
+    resetSearchAndApplyFilter();
+  }
+
+  function clearSearch() {
+    if (!q) return;
+    q.value = "";
+  }
+
+  function resetSearchAndApplyFilter() {
+    clearSearch();
     applyFilter();
   }
 
   function showAllArticles() {
     activeCategory = "";
     syncActiveCategoryButtons();
-    applyFilter();
+    resetSearchAndApplyFilter();
   }
 
   function getOldestArticles(sourceList, limit = 5) {
@@ -638,15 +648,20 @@
 
   function scrollToArticle(anchorId) {
     if (!anchorId) return;
-    const target = document.getElementById(anchorId);
-    if (!target) return;
+    clearSearch();
+    applyFilter();
 
-    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.requestAnimationFrame(() => {
+      const target = document.getElementById(anchorId);
+      if (!target) return;
 
-    target.classList.add("article-highlight");
-    window.setTimeout(() => {
-      target.classList.remove("article-highlight");
-    }, 1800);
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+
+      target.classList.add("article-highlight");
+      window.setTimeout(() => {
+        target.classList.remove("article-highlight");
+      }, 1800);
+    });
   }
 
   function renderNewArticles(sourceList) {
@@ -756,7 +771,7 @@
 
     const readBtn = document.createElement("a");
     readBtn.className = "btn";
-    readBtn.href = pdfHref;
+    readBtn.href = "articles/joy-in-suffering.html";
     readBtn.target = "_blank";
     readBtn.rel = "noopener";
     readBtn.innerHTML = `<span class="icon">📖</span> Read Article`;

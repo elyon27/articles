@@ -1,6 +1,17 @@
 <!doctype html>
 <html lang="en">
 <head>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-N6HP9CRGJG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-N6HP9CRGJG');
+</script>
+
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Articles</title>
@@ -413,6 +424,25 @@
       }
     }
 
+    .article-highlight{
+      animation:articleFlash 1.8s ease;
+    }
+
+    @keyframes articleFlash {
+      0% {
+        box-shadow:0 0 0 rgba(216,180,106,0);
+        border-color:rgba(255,255,255,.10);
+      }
+      35% {
+        box-shadow:0 0 0 3px rgba(216,180,106,.22), 0 14px 40px rgba(216,180,106,.18);
+        border-color:rgba(216,180,106,.70);
+      }
+      100% {
+        box-shadow:0 10px 30px rgba(0,0,0,.25);
+        border-color:rgba(255,255,255,.10);
+      }
+    }
+
     .empty{
       margin-top:18px;
       padding:16px;
@@ -440,10 +470,19 @@
       border-color:rgba(255,255,255,0.35);
       transform:translateY(-1px);
     }
+
+    .flag-btn img{
+      width:24px;
+      height:24px;
+      display:block;
+      object-fit:cover;
+      border-radius:50%;
+    }
   </style>
 </head>
 
 <body>
+
 <header class="site-header">
   <div class="container navbar">
     <a class="brand" href="https://crownmind.netlify.app" aria-label="CrownMind Institute Home">
@@ -588,6 +627,28 @@
       .slice(0, limit);
   }
 
+  function articleAnchorId(item) {
+    const raw = item?.file || item?.title || `article-${item?.number ?? ""}`;
+    return "article-" + String(raw)
+      .toLowerCase()
+      .replace(/\.[^.]+$/, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
+  function scrollToArticle(anchorId) {
+    if (!anchorId) return;
+    const target = document.getElementById(anchorId);
+    if (!target) return;
+
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    target.classList.add("article-highlight");
+    window.setTimeout(() => {
+      target.classList.remove("article-highlight");
+    }, 1800);
+  }
+
   function renderNewArticles(sourceList) {
     if (!newArticlesListEl) return;
     const oldest = getOldestArticles(sourceList, 5);
@@ -597,11 +658,11 @@
     }
 
     newArticlesListEl.innerHTML = oldest.map((item, index) => {
+      const anchorId = articleAnchorId(item);
       const file = item.file || "Untitled.pdf";
-      const href = PDF_DIR + file;
       return `
         <li class="new-articles-item">
-          <a class="new-articles-link" href="${href}" target="_blank" rel="noopener">
+          <a class="new-articles-link" href="#${anchorId}" data-article-target="${anchorId}">
             <span class="new-articles-index">${index + 1}</span>
             <span class="new-articles-name">${escapeHtml(file)}</span>
           </a>
@@ -632,6 +693,7 @@
 
     const card = document.createElement("article");
     card.className = "card";
+    card.id = articleAnchorId(item);
 
     const thumb = document.createElement("div");
     thumb.className = "thumb";
@@ -692,46 +754,104 @@
     const articleLinks = document.createElement("div");
     articleLinks.className = "article-links";
 
-    const readBtn = document.createElement("span");
+    const readBtn = document.createElement("a");
     readBtn.className = "btn";
-    readBtn.style.opacity = "0.5";
-    readBtn.style.cursor = "not-allowed";
+    readBtn.href = "articles/joy-in-suffering.html";
+    readBtn.target = "_blank";
+    readBtn.rel = "noopener";
     readBtn.innerHTML = `<span class="icon">📖</span> Read Article`;
+
+    // 🔥 ADD THIS
+    readBtn.addEventListener("click", function () {
+      if (typeof gtag === "function") {
+        gtag("event", "read_article_click", {
+         article_title: title,
+         article_file: file,
+         location: "main_list"
+       });
+      }
+    });
+
+
+
+    const backToTopBtn = document.createElement("button");
+    backToTopBtn.className = "btn";
+    backToTopBtn.innerHTML = `<span class="icon">⬆️</span> Back To Top`;
+
+    backToTopBtn.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    });
 
     const flagActions = document.createElement("div");
     flagActions.className = "flag-actions";
 
+    // 🇺🇸 English Button
     const americanBtn = document.createElement("a");
     americanBtn.className = "flag-btn";
     americanBtn.href = pdfHref;
     americanBtn.target = "_blank";
     americanBtn.rel = "noopener";
-    americanBtn.setAttribute("aria-label", `Read ${title} in English`);
-    americanBtn.title = "Read English article";
-    americanBtn.textContent = "🇺🇸";
+    americanBtn.innerHTML = '<img src="assets/img/flags/us.png" alt="English">';
 
+    americanBtn.addEventListener("click", function () {
+      if (typeof gtag === "function") {
+        gtag("event", "article_click_english", {
+          article_title: title,
+          language: "american"
+        });
+      }
+    });
+
+    // 🇵🇭 Tagalog Button
     const philippinesBtn = document.createElement("a");
     philippinesBtn.className = "flag-btn";
     philippinesBtn.href = tagalogHref;
     philippinesBtn.target = "_blank";
     philippinesBtn.rel = "noopener";
-    philippinesBtn.setAttribute("aria-label", `Read ${title} in Tagalog`);
-    philippinesBtn.title = "Read Tagalog article";
-    philippinesBtn.textContent = "🇵🇭";
+    philippinesBtn.innerHTML = '<img src="assets/img/flags/ph.png" alt="Tagalog">';
 
+    philippinesBtn.addEventListener("click", function () {
+      if (typeof gtag === "function") {
+        gtag("event", "article_click_tagalog", {
+          article_title: title,
+          language: "tagalog"
+        });
+      }
+    });
+
+    // 🇪🇸 Spanish Button
     const spainBtn = document.createElement("a");
     spainBtn.className = "flag-btn";
     spainBtn.href = spanishHref;
     spainBtn.target = "_blank";
     spainBtn.rel = "noopener";
-    spainBtn.setAttribute("aria-label", `Read ${title} in Spanish`);
-    spainBtn.title = "Read Spanish article";
-    spainBtn.textContent = "🇪🇸";
+    spainBtn.innerHTML = '<img src="assets/img/flags/es.png" alt="Spanish">';
 
+    spainBtn.addEventListener("click", function () {
+      if (typeof gtag === "function") {
+        gtag("event", "article_click_spanish", {
+          article_title: title,
+          language: "spanish"
+        });
+      }
+    });
+
+    // Append buttons
     flagActions.appendChild(americanBtn);
     flagActions.appendChild(philippinesBtn);
     flagActions.appendChild(spainBtn);
-    articleLinks.appendChild(readBtn);
+    const topActions = document.createElement("div");
+    topActions.style.display = "flex";
+    topActions.style.gap = "10px";
+    topActions.style.flexWrap = "wrap";
+
+    topActions.appendChild(readBtn);
+    topActions.appendChild(backToTopBtn);
+
+    articleLinks.appendChild(topActions);
     articleLinks.appendChild(flagActions);
 
     const meta = document.createElement("span");
@@ -852,6 +972,17 @@
       ];
       applyFilter();
     }
+  }
+
+  if (newArticlesListEl) {
+    newArticlesListEl.addEventListener("click", (event) => {
+      const link = event.target.closest("[data-article-target]");
+      if (!link) return;
+
+      event.preventDefault();
+      const anchorId = link.getAttribute("data-article-target");
+      scrollToArticle(anchorId);
+    });
   }
 
   q.addEventListener("input", applyFilter);

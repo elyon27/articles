@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Joy In Suffering</title>
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-N6HP9CRGJG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-N6HP9CRGJG');
+  </script>
+
+  <style>
+    body {font-family: Arial; background:#0b0f1a; color:white; margin:0; padding:20px;}
+    .container {max-width:800px; margin:auto;}
+    h1 {color:#d8b46a;}
+    a {color:#d8b46a;}
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Joy In Suffering</h1>
+
+  <p>Suffering is often treated as an interruption to life. Yet some of the deepest transformations of the soul occur within it.</p>
+  <p>Joy in suffering is not denial. It is the discovery that even in affliction, the heart may remain anchored.</p>
+  <p>Trials reveal what comfort conceals. They shape patience, humility, and dependence.</p>
+  <p>Joy is not the absence of pain, but the presence of hope.</p>
+
+  <p><a id="pdfBtn" href="../assets/articles/Joy In Suffering.pdf" target="_blank">Open PDF Version</a></p>
+</div>
+
+<script>
+const title = "Joy In Suffering";
+const file = "Joy In Suffering.pdf";
+
+function track(name, data={}) {
+  if(typeof gtag==="function"){
+    gtag("event", name, {
+      article_title: title,
+      article_file: file,
+      ...data
+    });
+  }
+}
+
+track("article_open");
+
+let sent50=false, sent90=false;
+
+window.addEventListener("scroll", ()=>{
+  const percent = (window.scrollY/(document.body.scrollHeight-window.innerHeight))*100;
+
+  if(!sent50 && percent>50){
+    sent50=true;
+    track("article_scroll",{scroll_percent:50});
+  }
+  if(!sent90 && percent>90){
+    sent90=true;
+    track("article_complete",{scroll_percent:100});
+  }
+});
+
+document.getElementById("pdfBtn").addEventListener("click", ()=>{
+  track("article_pdf_open");
+});
+</script>
+
+</body>
+</html>
