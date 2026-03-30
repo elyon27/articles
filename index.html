@@ -605,16 +605,35 @@
     categoryButtons.forEach(btn => btn.classList.toggle("active", btn.dataset.category === activeCategory));
   }
 
+  function clearSearchInput() {
+    if (!q || !q.value) return false;
+    q.value = "";
+    return true;
+  }
+
+  function resetFilters(options = {}) {
+    const { clearCategory = false } = options;
+    const searchCleared = clearSearchInput();
+
+    if (clearCategory) {
+      activeCategory = "";
+      syncActiveCategoryButtons();
+    }
+
+    if (searchCleared || clearCategory) {
+      applyFilter();
+    }
+  }
+
   function setActiveCategory(category = "") {
+    clearSearchInput();
     activeCategory = activeCategory === category ? "" : category;
     syncActiveCategoryButtons();
     applyFilter();
   }
 
   function showAllArticles() {
-    activeCategory = "";
-    syncActiveCategoryButtons();
-    applyFilter();
+    resetFilters({ clearCategory: true });
   }
 
   function getOldestArticles(sourceList, limit = 5) {
@@ -771,6 +790,7 @@
 
     // 🔥 ADD THIS
     readBtn.addEventListener("click", function () {
+      resetFilters({ clearCategory: true });
       if (typeof gtag === "function") {
         gtag("event", "read_article_click", {
          article_title: title,
@@ -787,6 +807,7 @@
     backToTopBtn.innerHTML = `<span class="icon">⬆️</span> Back To Top`;
 
     backToTopBtn.addEventListener("click", () => {
+      resetFilters({ clearCategory: true });
       window.scrollTo({
         top: 0,
         behavior: "smooth"
@@ -805,6 +826,7 @@
     americanBtn.innerHTML = '<img src="assets/img/flags/us.png" alt="English">';
 
     americanBtn.addEventListener("click", function () {
+      resetFilters({ clearCategory: true });
       if (typeof gtag === "function") {
         gtag("event", "article_click_english", {
           article_title: title,
@@ -822,6 +844,7 @@
     philippinesBtn.innerHTML = '<img src="assets/img/flags/ph.png" alt="Tagalog">';
 
     philippinesBtn.addEventListener("click", function () {
+      resetFilters({ clearCategory: true });
       if (typeof gtag === "function") {
         gtag("event", "article_click_tagalog", {
           article_title: title,
@@ -839,6 +862,7 @@
     spainBtn.innerHTML = '<img src="assets/img/flags/es.png" alt="Spanish">';
 
     spainBtn.addEventListener("click", function () {
+      resetFilters({ clearCategory: true });
       if (typeof gtag === "function") {
         gtag("event", "article_click_spanish", {
           article_title: title,
@@ -989,7 +1013,8 @@
 
       event.preventDefault();
       const anchorId = link.getAttribute("data-article-target");
-      scrollToArticle(anchorId);
+      resetFilters({ clearCategory: true });
+      requestAnimationFrame(() => scrollToArticle(anchorId));
     });
   }
 
