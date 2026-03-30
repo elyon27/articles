@@ -470,6 +470,14 @@
       border-color:rgba(255,255,255,0.35);
       transform:translateY(-1px);
     }
+
+    .flag-btn img{
+      width:24px;
+      height:24px;
+      display:block;
+      object-fit:cover;
+      border-radius:50%;
+    }
   </style>
 </head>
 
@@ -753,14 +761,14 @@
     readBtn.rel = "noopener";
     readBtn.innerHTML = `<span class="icon">📖</span> Read Article`;
 
+    // 🔥 ADD THIS
     readBtn.addEventListener("click", function () {
       if (typeof gtag === "function") {
-        gtag("event", "article_open", {
-          article_title: title,
-          article_file: file,
-          language: "english",
-          location: "main_list"
-        });
+        gtag("event", "read_article_click", {
+         article_title: title,
+         article_file: file,
+         location: "main_list"
+       });
       }
     });
 
@@ -780,63 +788,44 @@
     const flagActions = document.createElement("div");
     flagActions.className = "flag-actions";
 
+    // 🇺🇸 English Button
     const americanBtn = document.createElement("a");
     americanBtn.className = "flag-btn";
-    americanBtn.href = pdfHref;
-    americanBtn.target = "_blank";
-    americanBtn.rel = "noopener";
-    americanBtn.setAttribute("aria-label", `Read ${title} in English`);
-    americanBtn.title = "Read English article";
-    americanBtn.textContent = "🇺🇸";
+    americanBtn.href = `articles/${file}`;
+    americanBtn.innerHTML = '<img src="assets/img/flags/us.png" alt="English">';
 
-    americanBtn.addEventListener("click", function () {
-      if (typeof gtag === "function") {
-        gtag("event", "language_click", {
-          article_title: title,
-          article_file: file,
-          language: "english"
-        });
-      }
-    });
-
+    // 🇵🇭 Tagalog Button
     const philippinesBtn = document.createElement("a");
     philippinesBtn.className = "flag-btn";
-    philippinesBtn.href = tagalogHref;
-    philippinesBtn.target = "_blank";
-    philippinesBtn.rel = "noopener";
-    philippinesBtn.setAttribute("aria-label", `Read ${title} in Tagalog`);
-    philippinesBtn.title = "Read Tagalog article";
-    philippinesBtn.textContent = "🇵🇭";
+    philippinesBtn.href = `tagalog/${file}`;
+    philippinesBtn.innerHTML = '<img src="assets/img/flags/ph.png" alt="Tagalog">';
+
 
     philippinesBtn.addEventListener("click", function () {
       if (typeof gtag === "function") {
-        gtag("event", "language_click", {
+        gtag("event", "article_click_tagalog", {
           article_title: title,
-          article_file: file,
           language: "tagalog"
         });
       }
     });
 
+    // 🇪🇸 Spanish Button
     const spainBtn = document.createElement("a");
     spainBtn.className = "flag-btn";
-    spainBtn.href = spanishHref;
-    spainBtn.target = "_blank";
-    spainBtn.rel = "noopener";
-    spainBtn.setAttribute("aria-label", `Read ${title} in Spanish`);
-    spainBtn.title = "Read Spanish article";
-    spainBtn.textContent = "🇪🇸";
+    spainBtn.href = `spanish/${file}`;
+    spainBtn.innerHTML = '<img src="assets/img/flags/es.png" alt="Spanish">';
 
     spainBtn.addEventListener("click", function () {
       if (typeof gtag === "function") {
-        gtag("event", "language_click", {
+        gtag("event", "article_click_spanish", {
           article_title: title,
-          article_file: file,
           language: "spanish"
         });
       }
     });
 
+    // Append buttons
     flagActions.appendChild(americanBtn);
     flagActions.appendChild(philippinesBtn);
     flagActions.appendChild(spainBtn);
