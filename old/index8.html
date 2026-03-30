@@ -753,14 +753,14 @@
     readBtn.rel = "noopener";
     readBtn.innerHTML = `<span class="icon">📖</span> Read Article`;
 
+    // 🔥 ADD THIS
     readBtn.addEventListener("click", function () {
       if (typeof gtag === "function") {
-        gtag("event", "article_open", {
-          article_title: title,
-          article_file: file,
-          language: "english",
-          location: "main_list"
-        });
+        gtag("event", "read_article_click", {
+         article_title: title,
+         article_file: file,
+         location: "main_list"
+       });
       }
     });
 
@@ -789,16 +789,6 @@
     americanBtn.title = "Read English article";
     americanBtn.textContent = "🇺🇸";
 
-    americanBtn.addEventListener("click", function () {
-      if (typeof gtag === "function") {
-        gtag("event", "language_click", {
-          article_title: title,
-          article_file: file,
-          language: "english"
-        });
-      }
-    });
-
     const philippinesBtn = document.createElement("a");
     philippinesBtn.className = "flag-btn";
     philippinesBtn.href = tagalogHref;
@@ -809,14 +799,13 @@
     philippinesBtn.textContent = "🇵🇭";
 
     philippinesBtn.addEventListener("click", function () {
-      if (typeof gtag === "function") {
-        gtag("event", "language_click", {
-          article_title: title,
-          article_file: file,
-          language: "tagalog"
-        });
-      }
-    });
+     if (typeof gtag === "function") {
+       gtag("event", "article_click_tagalog", {
+         article_title: title,
+         language: "tagalog"
+       });
+     }
+   });
 
     const spainBtn = document.createElement("a");
     spainBtn.className = "flag-btn";
@@ -829,9 +818,8 @@
 
     spainBtn.addEventListener("click", function () {
       if (typeof gtag === "function") {
-        gtag("event", "language_click", {
+        gtag("event", "article_click_spanish", {
           article_title: title,
-          article_file: file,
           language: "spanish"
         });
       }
