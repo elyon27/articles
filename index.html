@@ -608,23 +608,13 @@
   function setActiveCategory(category = "") {
     activeCategory = activeCategory === category ? "" : category;
     syncActiveCategoryButtons();
-    resetSearchAndApplyFilter();
-  }
-
-  function clearSearch() {
-    if (!q) return;
-    q.value = "";
-  }
-
-  function resetSearchAndApplyFilter() {
-    clearSearch();
     applyFilter();
   }
 
   function showAllArticles() {
     activeCategory = "";
     syncActiveCategoryButtons();
-    resetSearchAndApplyFilter();
+    applyFilter();
   }
 
   function getOldestArticles(sourceList, limit = 5) {
@@ -648,20 +638,15 @@
 
   function scrollToArticle(anchorId) {
     if (!anchorId) return;
-    clearSearch();
-    applyFilter();
+    const target = document.getElementById(anchorId);
+    if (!target) return;
 
-    window.requestAnimationFrame(() => {
-      const target = document.getElementById(anchorId);
-      if (!target) return;
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
 
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
-
-      target.classList.add("article-highlight");
-      window.setTimeout(() => {
-        target.classList.remove("article-highlight");
-      }, 1800);
-    });
+    target.classList.add("article-highlight");
+    window.setTimeout(() => {
+      target.classList.remove("article-highlight");
+    }, 1800);
   }
 
   function renderNewArticles(sourceList) {
@@ -769,9 +754,17 @@
     const articleLinks = document.createElement("div");
     articleLinks.className = "article-links";
 
+    const trackingPages = {
+    "Joy In Suffering.pdf": "assets/articles/html/joy-in-suffering.html",
+    "Your Past Will Not Define You.pdf": "assets/articles/html/your-past-will-not-define-you.html",
+    "You Build Your World.pdf": "assets/articles/html/you-build-your-world.html"
+    };
+
+    
+
     const readBtn = document.createElement("a");
     readBtn.className = "btn";
-    readBtn.href = "articles/joy-in-suffering.html";
+    readBtn.href = trackingPages[file] || pdfHref;
     readBtn.target = "_blank";
     readBtn.rel = "noopener";
     readBtn.innerHTML = `<span class="icon">📖</span> Read Article`;

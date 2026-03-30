@@ -754,9 +754,17 @@
     const articleLinks = document.createElement("div");
     articleLinks.className = "article-links";
 
+    const trackingPages = {
+    "Joy In Suffering.pdf": "assets/articles/joy-in-suffering.html",
+    "Your Past Will Not Define You.pdf": "assets/articles/your-past-will-not-define-you.html",
+    "You Build Your World.pdf": "assets/articles/you-build-your-world.html"
+    };
+
+    
+
     const readBtn = document.createElement("a");
     readBtn.className = "btn";
-    readBtn.href = "articles/joy-in-suffering.html";
+    readBtn.href = trackingPages[file] || pdfHref;
     readBtn.target = "_blank";
     readBtn.rel = "noopener";
     readBtn.innerHTML = `<span class="icon">📖</span> Read Article`;
