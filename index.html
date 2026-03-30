@@ -474,11 +474,7 @@
 </head>
 
 <body>
-gtag("event", "article_click", {
-  article_title: title,
-  category: category,
-  source: "crown-articles"
-});
+
 <header class="site-header">
   <div class="container navbar">
     <a class="brand" href="https://crownmind.netlify.app" aria-label="CrownMind Institute Home">
@@ -756,6 +752,19 @@ gtag("event", "article_click", {
     readBtn.target = "_blank";
     readBtn.rel = "noopener";
     readBtn.innerHTML = `<span class="icon">📖</span> Read Article`;
+
+    // 🔥 ADD THIS
+    readBtn.addEventListener("click", function () {
+      if (typeof gtag === "function") {
+        gtag("event", "read_article_click", {
+         article_title: title,
+         article_file: file,
+         location: "main_list"
+       });
+      }
+    });
+
+
 
     const backToTopBtn = document.createElement("button");
     backToTopBtn.className = "btn";
