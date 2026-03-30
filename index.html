@@ -734,10 +734,11 @@
     const articleLinks = document.createElement("div");
     articleLinks.className = "article-links";
 
-    const readBtn = document.createElement("span");
+    const readBtn = document.createElement("a");
     readBtn.className = "btn";
-    readBtn.style.opacity = "0.5";
-    readBtn.style.cursor = "not-allowed";
+    readBtn.href = pdfHref;
+    readBtn.target = "_blank";
+    readBtn.rel = "noopener";
     readBtn.innerHTML = `<span class="icon">📖</span> Read Article`;
 
     const backToTopBtn = document.createElement("button");
