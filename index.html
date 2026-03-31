@@ -538,12 +538,18 @@
   <div class="empty" id="empty"></div>
 </main>
 
+<script src="assets/js/tracking-pages.js"></script>
+<script src="assets/js/tracking-pages.js"></script>
 <script>
   const PDF_DIR = "assets/articles/";
   const TAGALOG_DIR = "assets/articles/Tagalog/";
   const SPANISH_DIR = "assets/articles/Spanish/";
   const COVERS_DIR = "assets/articles/covers/";
   const MANIFEST = new URL("./assets/articles/articles.json", window.location.href).href;
+
+  const trackingPages = (typeof window !== "undefined" && window.trackingPages)
+    ? window.trackingPages
+    : {};
 
   const grid = document.getElementById("grid");
   const empty = document.getElementById("empty");
@@ -605,35 +611,16 @@
     categoryButtons.forEach(btn => btn.classList.toggle("active", btn.dataset.category === activeCategory));
   }
 
-  function clearSearchInput() {
-    if (!q || !q.value) return false;
-    q.value = "";
-    return true;
-  }
-
-  function resetFilters(options = {}) {
-    const { clearCategory = false } = options;
-    const searchCleared = clearSearchInput();
-
-    if (clearCategory) {
-      activeCategory = "";
-      syncActiveCategoryButtons();
-    }
-
-    if (searchCleared || clearCategory) {
-      applyFilter();
-    }
-  }
-
   function setActiveCategory(category = "") {
-    clearSearchInput();
     activeCategory = activeCategory === category ? "" : category;
     syncActiveCategoryButtons();
     applyFilter();
   }
 
   function showAllArticles() {
-    resetFilters({ clearCategory: true });
+    activeCategory = "";
+    syncActiveCategoryButtons();
+    applyFilter();
   }
 
   function getOldestArticles(sourceList, limit = 5) {
@@ -773,24 +760,17 @@
     const articleLinks = document.createElement("div");
     articleLinks.className = "article-links";
 
-    const trackingPages = {
-    "Joy In Suffering.pdf": "assets/articles/html/joy-in-suffering.html",
-    "Your Past Will Not Define You.pdf": "assets/articles/html/your-past-will-not-define-you.html",
-    "You Build Your World.pdf": "assets/articles/html/you-build-your-world.html"
-    };
+    const trackingPages = window.trackingPages || {};
 
-    
 
     const readBtn = document.createElement("a");
     readBtn.className = "btn";
     readBtn.href = trackingPages[file] || pdfHref;
-    readBtn.target = "_blank";
-    readBtn.rel = "noopener";
+    readBtn.target = "_self";
     readBtn.innerHTML = `<span class="icon">📖</span> Read Article`;
 
     // 🔥 ADD THIS
     readBtn.addEventListener("click", function () {
-      resetFilters({ clearCategory: true });
       if (typeof gtag === "function") {
         gtag("event", "read_article_click", {
          article_title: title,
@@ -807,7 +787,6 @@
     backToTopBtn.innerHTML = `<span class="icon">⬆️</span> Back To Top`;
 
     backToTopBtn.addEventListener("click", () => {
-      resetFilters({ clearCategory: true });
       window.scrollTo({
         top: 0,
         behavior: "smooth"
@@ -826,7 +805,6 @@
     americanBtn.innerHTML = '<img src="assets/img/flags/us.png" alt="English">';
 
     americanBtn.addEventListener("click", function () {
-      resetFilters({ clearCategory: true });
       if (typeof gtag === "function") {
         gtag("event", "article_click_english", {
           article_title: title,
@@ -844,7 +822,6 @@
     philippinesBtn.innerHTML = '<img src="assets/img/flags/ph.png" alt="Tagalog">';
 
     philippinesBtn.addEventListener("click", function () {
-      resetFilters({ clearCategory: true });
       if (typeof gtag === "function") {
         gtag("event", "article_click_tagalog", {
           article_title: title,
@@ -862,7 +839,6 @@
     spainBtn.innerHTML = '<img src="assets/img/flags/es.png" alt="Spanish">';
 
     spainBtn.addEventListener("click", function () {
-      resetFilters({ clearCategory: true });
       if (typeof gtag === "function") {
         gtag("event", "article_click_spanish", {
           article_title: title,
@@ -1013,8 +989,7 @@
 
       event.preventDefault();
       const anchorId = link.getAttribute("data-article-target");
-      resetFilters({ clearCategory: true });
-      requestAnimationFrame(() => scrollToArticle(anchorId));
+      scrollToArticle(anchorId);
     });
   }
 
