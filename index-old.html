@@ -799,8 +799,8 @@
     const americanBtn = document.createElement("a");
     americanBtn.className = "flag-btn";
     americanBtn.href = pdfHref;
-    americanBtn.target = "_self";
-    americanBtn.setAttribute("download", file);
+    americanBtn.target = "_blank";
+    americanBtn.rel = "noopener";
     americanBtn.innerHTML = '<img src="assets/img/flags/us.png" alt="English">';
 
     americanBtn.addEventListener("click", function () {
@@ -816,8 +816,8 @@
     const philippinesBtn = document.createElement("a");
     philippinesBtn.className = "flag-btn";
     philippinesBtn.href = tagalogHref;
-    philippinesBtn.target = "_self";
-    philippinesBtn.setAttribute("download", item.tagalogFile || file);
+    philippinesBtn.target = "_blank";
+    philippinesBtn.rel = "noopener";
     philippinesBtn.innerHTML = '<img src="assets/img/flags/ph.png" alt="Tagalog">';
 
     philippinesBtn.addEventListener("click", function () {
@@ -833,8 +833,8 @@
     const spainBtn = document.createElement("a");
     spainBtn.className = "flag-btn";
     spainBtn.href = spanishHref;
-    spainBtn.target = "_self";
-    spainBtn.setAttribute("download", item.spanishFile || file);
+    spainBtn.target = "_blank";
+    spainBtn.rel = "noopener";
     spainBtn.innerHTML = '<img src="assets/img/flags/es.png" alt="Spanish">';
 
     spainBtn.addEventListener("click", function () {
