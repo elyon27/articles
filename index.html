@@ -541,6 +541,7 @@
 <script src="assets/js/tracking-pages.js"></script>
 <script>
   const PDF_DIR = "assets/articles/";
+  const ENGLISH_DIR = "assets/articles/English/";
   const TAGALOG_DIR = "assets/articles/Tagalog/";
   const SPANISH_DIR = "assets/articles/Spanish/";
   const COVERS_DIR = "assets/articles/covers/";
@@ -574,6 +575,14 @@
   function baseName(filename) {
     const i = filename.lastIndexOf(".");
     return i >= 0 ? filename.slice(0, i) : filename;
+  }
+
+  function makeLocalizedFilename(file, suffix) {
+    return `${baseName(file)}-${suffix}.pdf`;
+  }
+
+  function makeDownloadHref(directory, filename) {
+    return encodeURI(directory + filename);
   }
 
   function normalizeCategoryName(value = "") {
@@ -682,8 +691,12 @@
     const desc = item.description || "PDF article";
     const categories = getCategories(item);
     const pdfHref = PDF_DIR + file;
-    const tagalogHref = TAGALOG_DIR + (item.tagalogFile || file);
-    const spanishHref = SPANISH_DIR + (item.spanishFile || file);
+    const englishFile = item.englishFile || makeLocalizedFilename(file, "en");
+    const tagalogFile = item.tagalogFile || makeLocalizedFilename(file, "ph");
+    const spanishFile = item.spanishFile || makeLocalizedFilename(file, "sp");
+    const englishHref = makeDownloadHref(ENGLISH_DIR, englishFile);
+    const tagalogHref = makeDownloadHref(TAGALOG_DIR, tagalogFile);
+    const spanishHref = makeDownloadHref(SPANISH_DIR, spanishFile);
 
     const coverCandidates = [];
     if (item.cover) coverCandidates.push(COVERS_DIR + item.cover);
@@ -798,9 +811,9 @@
     // 🇺🇸 English Button
     const americanBtn = document.createElement("a");
     americanBtn.className = "flag-btn";
-    americanBtn.href = pdfHref;
+    americanBtn.href = englishHref;
     americanBtn.target = "_self";
-    americanBtn.setAttribute("download", file);
+    americanBtn.setAttribute("download", englishFile);
     americanBtn.innerHTML = '<img src="assets/img/flags/us.png" alt="English">';
 
     americanBtn.addEventListener("click", function () {
@@ -817,7 +830,7 @@
     philippinesBtn.className = "flag-btn";
     philippinesBtn.href = tagalogHref;
     philippinesBtn.target = "_self";
-    philippinesBtn.setAttribute("download", item.tagalogFile || file);
+    philippinesBtn.setAttribute("download", tagalogFile);
     philippinesBtn.innerHTML = '<img src="assets/img/flags/ph.png" alt="Tagalog">';
 
     philippinesBtn.addEventListener("click", function () {
@@ -834,7 +847,7 @@
     spainBtn.className = "flag-btn";
     spainBtn.href = spanishHref;
     spainBtn.target = "_self";
-    spainBtn.setAttribute("download", item.spanishFile || file);
+    spainBtn.setAttribute("download", spanishFile);
     spainBtn.innerHTML = '<img src="assets/img/flags/es.png" alt="Spanish">';
 
     spainBtn.addEventListener("click", function () {

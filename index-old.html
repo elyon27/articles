@@ -541,6 +541,7 @@
 <script src="assets/js/tracking-pages.js"></script>
 <script>
   const PDF_DIR = "assets/articles/";
+  const ENGLISH_DIR = "assets/articles/English/";
   const TAGALOG_DIR = "assets/articles/Tagalog/";
   const SPANISH_DIR = "assets/articles/Spanish/";
   const COVERS_DIR = "assets/articles/covers/";
@@ -574,6 +575,12 @@
   function baseName(filename) {
     const i = filename.lastIndexOf(".");
     return i >= 0 ? filename.slice(0, i) : filename;
+  }
+
+
+  function localizedFileName(item, suffix) {
+    const sourceName = baseName(item?.file || item?.title || "Untitled");
+    return `${sourceName}-${suffix}.pdf`;
   }
 
   function normalizeCategoryName(value = "") {
@@ -682,8 +689,12 @@
     const desc = item.description || "PDF article";
     const categories = getCategories(item);
     const pdfHref = PDF_DIR + file;
-    const tagalogHref = TAGALOG_DIR + (item.tagalogFile || file);
-    const spanishHref = SPANISH_DIR + (item.spanishFile || file);
+    const englishFileName = item.englishFile || localizedFileName(item, "en");
+    const tagalogFileName = item.tagalogFile || localizedFileName(item, "ph");
+    const spanishFileName = item.spanishFile || localizedFileName(item, "sp");
+    const englishHref = ENGLISH_DIR + englishFileName;
+    const tagalogHref = TAGALOG_DIR + tagalogFileName;
+    const spanishHref = SPANISH_DIR + spanishFileName;
 
     const coverCandidates = [];
     if (item.cover) coverCandidates.push(COVERS_DIR + item.cover);
