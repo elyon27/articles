@@ -577,10 +577,12 @@
     return i >= 0 ? filename.slice(0, i) : filename;
   }
 
+  function makeLocalizedFilename(file, suffix) {
+    return `${baseName(file)}-${suffix}.pdf`;
+  }
 
-  function localizedFileName(item, suffix) {
-    const sourceName = baseName(item?.file || item?.title || "Untitled");
-    return `${sourceName}-${suffix}.pdf`;
+  function makeDownloadHref(directory, filename) {
+    return encodeURI(directory + filename);
   }
 
   function normalizeCategoryName(value = "") {
@@ -689,12 +691,12 @@
     const desc = item.description || "PDF article";
     const categories = getCategories(item);
     const pdfHref = PDF_DIR + file;
-    const englishFileName = item.englishFile || localizedFileName(item, "en");
-    const tagalogFileName = item.tagalogFile || localizedFileName(item, "ph");
-    const spanishFileName = item.spanishFile || localizedFileName(item, "sp");
-    const englishHref = ENGLISH_DIR + englishFileName;
-    const tagalogHref = TAGALOG_DIR + tagalogFileName;
-    const spanishHref = SPANISH_DIR + spanishFileName;
+    const englishFile = item.englishFile || makeLocalizedFilename(file, "en");
+    const tagalogFile = item.tagalogFile || makeLocalizedFilename(file, "ph");
+    const spanishFile = item.spanishFile || makeLocalizedFilename(file, "sp");
+    const englishHref = makeDownloadHref(ENGLISH_DIR, englishFile);
+    const tagalogHref = makeDownloadHref(TAGALOG_DIR, tagalogFile);
+    const spanishHref = makeDownloadHref(SPANISH_DIR, spanishFile);
 
     const coverCandidates = [];
     if (item.cover) coverCandidates.push(COVERS_DIR + item.cover);
@@ -809,9 +811,9 @@
     // 🇺🇸 English Button
     const americanBtn = document.createElement("a");
     americanBtn.className = "flag-btn";
-    americanBtn.href = pdfHref;
-    americanBtn.target = "_blank";
-    americanBtn.rel = "noopener";
+    americanBtn.href = englishHref;
+    americanBtn.target = "_self";
+    americanBtn.setAttribute("download", englishFile);
     americanBtn.innerHTML = '<img src="assets/img/flags/us.png" alt="English">';
 
     americanBtn.addEventListener("click", function () {
@@ -827,8 +829,8 @@
     const philippinesBtn = document.createElement("a");
     philippinesBtn.className = "flag-btn";
     philippinesBtn.href = tagalogHref;
-    philippinesBtn.target = "_blank";
-    philippinesBtn.rel = "noopener";
+    philippinesBtn.target = "_self";
+    philippinesBtn.setAttribute("download", tagalogFile);
     philippinesBtn.innerHTML = '<img src="assets/img/flags/ph.png" alt="Tagalog">';
 
     philippinesBtn.addEventListener("click", function () {
@@ -844,8 +846,8 @@
     const spainBtn = document.createElement("a");
     spainBtn.className = "flag-btn";
     spainBtn.href = spanishHref;
-    spainBtn.target = "_blank";
-    spainBtn.rel = "noopener";
+    spainBtn.target = "_self";
+    spainBtn.setAttribute("download", spanishFile);
     spainBtn.innerHTML = '<img src="assets/img/flags/es.png" alt="Spanish">';
 
     spainBtn.addEventListener("click", function () {
