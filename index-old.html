@@ -544,6 +544,7 @@
   const ENGLISH_DIR = "assets/articles/English/";
   const TAGALOG_DIR = "assets/articles/Tagalog/";
   const SPANISH_DIR = "assets/articles/Spanish/";
+  const ARABIC_DIR = "assets/articles/arabic/";
   const COVERS_DIR = "assets/articles/covers/";
   const MANIFEST = new URL("./assets/articles/articles.json", window.location.href).href;
 
@@ -694,9 +695,11 @@
     const englishFile = item.englishFile || makeLocalizedFilename(file, "en");
     const tagalogFile = item.tagalogFile || makeLocalizedFilename(file, "ph");
     const spanishFile = item.spanishFile || makeLocalizedFilename(file, "sp");
+    const arabicFile = item.arabicFile || makeLocalizedFilename(file, "ar");
     const englishHref = makeDownloadHref(ENGLISH_DIR, englishFile);
     const tagalogHref = makeDownloadHref(TAGALOG_DIR, tagalogFile);
     const spanishHref = makeDownloadHref(SPANISH_DIR, spanishFile);
+    const arabicHref = makeDownloadHref(ARABIC_DIR, arabicFile);
 
     const coverCandidates = [];
     if (item.cover) coverCandidates.push(COVERS_DIR + item.cover);
@@ -859,10 +862,28 @@
       }
     });
 
+    // 🇰🇼 Arabic Button
+    const kuwaitBtn = document.createElement("a");
+    kuwaitBtn.className = "flag-btn";
+    kuwaitBtn.href = arabicHref;
+    kuwaitBtn.target = "_self";
+    kuwaitBtn.setAttribute("download", arabicFile);
+    kuwaitBtn.innerHTML = '<img src="assets/img/flags/kw.png" alt="Arabic">';
+
+    kuwaitBtn.addEventListener("click", function () {
+      if (typeof gtag === "function") {
+        gtag("event", "article_click_arabic", {
+          article_title: title,
+          language: "arabic"
+        });
+      }
+    });
+
     // Append buttons
     flagActions.appendChild(americanBtn);
     flagActions.appendChild(philippinesBtn);
     flagActions.appendChild(spainBtn);
+    flagActions.appendChild(kuwaitBtn);
     const topActions = document.createElement("div");
     topActions.style.display = "flex";
     topActions.style.gap = "10px";
