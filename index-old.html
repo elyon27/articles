@@ -692,14 +692,19 @@
     applyFilter();
   }
 
-  function getOldestArticles(sourceList, limit = 5) {
+  function getLatestHardwiredArticles(sourceList, limit = 5) {
     return [...sourceList]
       .sort((a, b) => {
         const aNum = Number(a.number) || 0;
         const bNum = Number(b.number) || 0;
-        return aNum - bNum;
+        return bNum - aNum;
       })
-      .slice(0, limit);
+      .slice(0, limit)
+      .sort((a, b) => {
+        const aNum = Number(a.number) || 0;
+        const bNum = Number(b.number) || 0;
+        return aNum - bNum;
+      });
   }
 
   function articleAnchorId(item) {
@@ -712,32 +717,39 @@
   }
 
   function scrollToArticle(anchorId) {
-    if (!anchorId) return;
-    const target = document.getElementById(anchorId);
-    if (!target) return;
+    if (!anchorId) return false;
+    const card = document.getElementById(anchorId);
+    if (!card) return false;
 
-    const titleEl = target.querySelector(".title") || target;
+    const titleEl = card.querySelector(".title") || card;
     const rect = titleEl.getBoundingClientRect();
     const absoluteTop = rect.top + window.pageYOffset;
-    const centeredTop = absoluteTop - ((window.innerHeight / 2) - (rect.height / 2));
+    const centeredTop = Math.max(0, absoluteTop - ((window.innerHeight - rect.height) / 2));
 
     window.scrollTo({
-      top: Math.max(0, centeredTop),
+      top: centeredTop,
       behavior: "smooth"
     });
 
-    target.classList.add("article-highlight");
+    card.classList.add("article-highlight");
     window.setTimeout(() => {
-      target.classList.remove("article-highlight");
+      card.classList.remove("article-highlight");
     }, 1800);
+
+    return true;
   }
 
-  function handleArticleSelectionFromQuery() {
+  function resolveSelectedArticleAnchor() {
     const params = new URLSearchParams(window.location.search);
+    const hashAnchorId = (window.location.hash || "").replace(/^#/, "").trim();
     const selectedTitle = (params.get("selectedArticle") || "").trim();
     const selectedFile = (params.get("selectedFile") || "").trim();
 
-    if (!selectedTitle && !selectedFile) return;
+    if (hashAnchorId && document.getElementById(hashAnchorId)) {
+      return hashAnchorId;
+    }
+
+    if (!selectedTitle && !selectedFile) return "";
 
     let matchedItem = null;
 
@@ -749,31 +761,44 @@
       matchedItem = all.find(item => String(item.title || baseName(item.file || "")).trim().toLowerCase() === selectedTitle.toLowerCase());
     }
 
-    if (!matchedItem) return;
+    return matchedItem ? articleAnchorId(matchedItem) : "";
+  }
+
+  function handleArticleSelectionFromQuery() {
+    const anchorId = resolveSelectedArticleAnchor();
+    if (!anchorId) return;
 
     if (q) q.value = "";
     activeCategory = "";
     syncActiveCategoryButtons();
     render(all);
 
-    const anchorId = articleAnchorId(matchedItem);
-    window.setTimeout(() => scrollToArticle(anchorId), 120);
+    const attemptScroll = () => {
+      const didScroll = scrollToArticle(anchorId);
+      if (!didScroll) return;
+      window.requestAnimationFrame(() => scrollToArticle(anchorId));
+      window.setTimeout(() => scrollToArticle(anchorId), 250);
+    };
+
+    window.requestAnimationFrame(attemptScroll);
+    window.setTimeout(attemptScroll, 120);
 
     const cleanUrl = new URL(window.location.href);
     cleanUrl.searchParams.delete("selectedArticle");
     cleanUrl.searchParams.delete("selectedFile");
+    cleanUrl.hash = anchorId;
     window.history.replaceState({}, document.title, cleanUrl.pathname + cleanUrl.search + cleanUrl.hash);
   }
 
   function renderNewArticles(sourceList) {
     if (!newArticlesListEl) return;
-    const oldest = getOldestArticles(sourceList, 5);
-    if (!oldest.length) {
+    const latest = getLatestHardwiredArticles(sourceList, 5);
+    if (!latest.length) {
       newArticlesListEl.innerHTML = '<li class="new-articles-item"><div class="new-articles-link">No article files available yet.</div></li>';
       return;
     }
 
-    newArticlesListEl.innerHTML = oldest.map((item, index) => {
+    newArticlesListEl.innerHTML = latest.map((item, index) => {
       const anchorId = articleAnchorId(item);
       const file = item.file || "Untitled.pdf";
       return `
@@ -1091,6 +1116,7 @@
     }
   });
 
+
   async function loadManifest() {
     try {
       const res = await fetch(MANIFEST, { cache: "no-store" });
@@ -1138,6 +1164,7 @@
       handleArticleSelectionFromQuery();
     }
   }
+
 
   if (newArticlesListEl) {
     newArticlesListEl.addEventListener("click", (event) => {
@@ -1196,6 +1223,12 @@
       console.warn("Unable to read pending article tracking payload.", error);
     }
   })();
+
+  window.addEventListener("load", () => {
+    const hashAnchorId = (window.location.hash || "").replace(/^#/, "").trim();
+    if (!hashAnchorId) return;
+    window.setTimeout(() => scrollToArticle(hashAnchorId), 200);
+  });
 
   loadManifest();
 </script>

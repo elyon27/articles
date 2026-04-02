@@ -574,6 +574,23 @@
   let all = [];
   let activeCategory = "";
 
+  function getResolvedArticleNumber(item, fallbackNumber = 0) {
+    const file = String(item?.file || "").trim();
+    const hardwiredMap = (typeof window !== "undefined" && window.HARDWIRED_ARTICLE_NUMBERS)
+      ? window.HARDWIRED_ARTICLE_NUMBERS
+      : {};
+    const hardwiredNumber = file ? Number(hardwiredMap[file]) : NaN;
+    if (Number.isFinite(hardwiredNumber) && hardwiredNumber > 0) {
+      return hardwiredNumber;
+    }
+    const ownNumber = Number(item?.number);
+    if (Number.isFinite(ownNumber) && ownNumber > 0) {
+      return ownNumber;
+    }
+    return fallbackNumber;
+  }
+
+
   function gaEvent(eventName, params = {}) {
     if (typeof window.gtag === "function") {
       window.gtag("event", eventName, params);
@@ -692,14 +709,16 @@
     applyFilter();
   }
 
-  function getOldestArticles(sourceList, limit = 5) {
+  function getLatestHardwiredArticles(sourceList, limit = 5) {
     return [...sourceList]
-      .sort((a, b) => {
-        const aNum = Number(a.number) || 0;
-        const bNum = Number(b.number) || 0;
-        return aNum - bNum;
-      })
-      .slice(0, limit);
+      .map((item, index) => ({
+        ...item,
+        __resolvedNumber: getResolvedArticleNumber(item, index + 1)
+      }))
+      .sort((a, b) => b.__resolvedNumber - a.__resolvedNumber)
+      .slice(0, limit)
+      .sort((a, b) => a.__resolvedNumber - b.__resolvedNumber)
+      .map(({ __resolvedNumber, ...item }) => item);
   }
 
   function articleAnchorId(item) {
@@ -787,13 +806,13 @@
 
   function renderNewArticles(sourceList) {
     if (!newArticlesListEl) return;
-    const oldest = getOldestArticles(sourceList, 5);
-    if (!oldest.length) {
+    const latest = getLatestHardwiredArticles(sourceList, 5);
+    if (!latest.length) {
       newArticlesListEl.innerHTML = '<li class="new-articles-item"><div class="new-articles-link">No article files available yet.</div></li>';
       return;
     }
 
-    newArticlesListEl.innerHTML = oldest.map((item, index) => {
+    newArticlesListEl.innerHTML = latest.map((item, index) => {
       const anchorId = articleAnchorId(item);
       const file = item.file || "Untitled.pdf";
       return `
@@ -1111,6 +1130,7 @@
     }
   });
 
+
   async function loadManifest() {
     try {
       const res = await fetch(MANIFEST, { cache: "no-store" });
@@ -1121,7 +1141,7 @@
         .filter(x => x && x.file)
         .map((item, index) => ({
           ...item,
-          number: item.number ?? index + 1
+          number: getResolvedArticleNumber(item, index + 1)
         }));
       applyFilter();
       handleArticleSelectionFromQuery();
@@ -1153,11 +1173,15 @@
         { title: "Faithful Without Fandom - Faith Without Compromise in Leadership", file: "Faithful Without Fandom.pdf", description: "Faithful Without Fandom - is a principled reflection on maintaining moral discernment, clean conscience, and spiritual integrity under flawed political leadership without idolizing power or compromising faith.", categories: ["Kingdom Living"] },
         { title: "Change Your Input Change Your World", file: "Change Your Input Change Your World.pdf", description: "Change Your Input, Change Your World - explores how the thoughts, information, and narratives we repeatedly consume shape our perception of reality, teaching that deliberate mental alignment transforms both inner life and outer experience.", categories: ["Kingdom Living"] },
         { title: "When Silence Is Strength: Choosing Dignity Over Reaction", file: "When Silence Is Strength.pdf", description: "This article teaches that choosing silence over reaction is a disciplined act of dignity and inner strength that preserves peace and protects the integrity of the soul.", categories: ["Wisdom & Character"] }
-      ];
+      ].map((item, index) => ({
+        ...item,
+        number: getResolvedArticleNumber(item, index + 1)
+      }));
       applyFilter();
       handleArticleSelectionFromQuery();
     }
   }
+
 
   if (newArticlesListEl) {
     newArticlesListEl.addEventListener("click", (event) => {
