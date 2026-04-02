@@ -92,6 +92,30 @@
       font-size:13px;
       line-height:1.5;
     }
+
+    .new-articles-heading-row{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .featured-article-label{
+      color:var(--gold);
+      font-size:18px;
+      letter-spacing:.2px;
+    }
+    .featured-article-link{
+      color:#5aa0ff;
+      font-size:18px;
+      letter-spacing:.2px;
+      text-decoration:none;
+      font-weight:600;
+      transition:opacity .12s ease, text-shadow .12s ease;
+    }
+    .featured-article-link:hover{
+      opacity:.92;
+      text-shadow:0 0 14px rgba(90,160,255,.25);
+    }
     .new-articles-list{
       list-style:none;
       margin:0;
@@ -503,7 +527,12 @@
   <section class="new-articles" aria-labelledby="new-articles-title">
     <div class="new-articles-head">
       <div>
-        <h2 id="new-articles-title" class="new-articles-title">5 New Added Article Files</h2>
+        <div class="new-articles-heading-row">
+          <h2 id="new-articles-title" class="new-articles-title">5 New Added Article Files</h2>
+          <span class="featured-article-label" aria-hidden="true"><strong>.</strong></span>
+          <span class="featured-article-label"><strong>Featured Article</strong></span>
+          <a href="#" id="featured-article-link" class="featured-article-link" data-featured-title="Joy In Suffering">Joy In Suffering</a>
+        </div>
       </div>
     </div>
     <ul id="new-articles-list" class="new-articles-list"></ul>
@@ -545,10 +574,11 @@
 <script src="assets/js/tracking-pages.js"></script>
 <script>
   const PDF_DIR = "assets/articles/";
-  const ENGLISH_DIR = "assets/articles/English/";
-  const TAGALOG_DIR = "assets/articles/Tagalog/";
-  const SPANISH_DIR = "assets/articles/Spanish/";
+  const ENGLISH_DIR = "assets/articles/english/";
+  const TAGALOG_DIR = "assets/articles/tagalog/";
+  const SPANISH_DIR = "assets/articles/spanish/";
   const ARABIC_DIR = "assets/articles/arabic/";
+  const FRENCH_DIR = "assets/articles/french/";
   const COVERS_DIR = "assets/articles/covers/";
   const MANIFEST = new URL("./assets/articles/articles.json", window.location.href).href;
 
@@ -563,6 +593,7 @@
   const categoryTotalEl = document.getElementById("category-total");
   const articleListBtn = document.getElementById("article-list-btn");
   const newArticlesListEl = document.getElementById("new-articles-list");
+  const featuredArticleLinkEl = document.getElementById("featured-article-link");
 
   const countDoctrineRevEl = document.getElementById("count-doctrine-rev");
   const countPropheticEl = document.getElementById("count-prophetic");
@@ -573,6 +604,23 @@
 
   let all = [];
   let activeCategory = "";
+
+  function getResolvedArticleNumber(item, fallbackNumber = 0) {
+    const file = String(item?.file || "").trim();
+    const hardwiredMap = (typeof window !== "undefined" && window.HARDWIRED_ARTICLE_NUMBERS)
+      ? window.HARDWIRED_ARTICLE_NUMBERS
+      : {};
+    const hardwiredNumber = file ? Number(hardwiredMap[file]) : NaN;
+    if (Number.isFinite(hardwiredNumber) && hardwiredNumber > 0) {
+      return hardwiredNumber;
+    }
+    const ownNumber = Number(item?.number);
+    if (Number.isFinite(ownNumber) && ownNumber > 0) {
+      return ownNumber;
+    }
+    return fallbackNumber;
+  }
+
 
   function gaEvent(eventName, params = {}) {
     if (typeof window.gtag === "function") {
@@ -694,17 +742,14 @@
 
   function getLatestHardwiredArticles(sourceList, limit = 5) {
     return [...sourceList]
-      .sort((a, b) => {
-        const aNum = Number(a.number) || 0;
-        const bNum = Number(b.number) || 0;
-        return bNum - aNum;
-      })
+      .map((item, index) => ({
+        ...item,
+        __resolvedNumber: getResolvedArticleNumber(item, index + 1)
+      }))
+      .sort((a, b) => b.__resolvedNumber - a.__resolvedNumber)
       .slice(0, limit)
-      .sort((a, b) => {
-        const aNum = Number(a.number) || 0;
-        const bNum = Number(b.number) || 0;
-        return aNum - bNum;
-      });
+      .sort((a, b) => a.__resolvedNumber - b.__resolvedNumber)
+      .map(({ __resolvedNumber, ...item }) => item);
   }
 
   function articleAnchorId(item) {
@@ -714,6 +759,16 @@
       .replace(/\.[^.]+$/, "")
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "");
+  }
+
+  function findArticleByTitle(title = "") {
+    const normalizedTitle = String(title || "").trim().toLowerCase();
+    if (!normalizedTitle) return null;
+
+    return all.find(item => {
+      const itemTitle = String(item.title || baseName(item.file || "")).trim().toLowerCase();
+      return itemTitle === normalizedTitle;
+    }) || null;
   }
 
   function scrollToArticle(anchorId) {
@@ -822,10 +877,12 @@
     const tagalogFile = item.tagalogFile || makeLocalizedFilename(file, "ph");
     const spanishFile = item.spanishFile || makeLocalizedFilename(file, "sp");
     const arabicFile = item.arabicFile || makeLocalizedFilename(file, "ar");
+    const frenchFile = item.frenchFile || makeLocalizedFilename(file, "fr");
     const englishHref = makeDownloadHref(ENGLISH_DIR, englishFile);
     const tagalogHref = makeDownloadHref(TAGALOG_DIR, tagalogFile);
     const spanishHref = makeDownloadHref(SPANISH_DIR, spanishFile);
     const arabicHref = makeDownloadHref(ARABIC_DIR, arabicFile);
+    const frenchHref = makeDownloadHref(FRENCH_DIR, frenchFile);
 
     const coverCandidates = [];
     if (item.cover) coverCandidates.push(COVERS_DIR + item.cover);
@@ -1008,11 +1065,28 @@
       });
     });
 
+    // 🇫🇷 French Button
+    const franceBtn = document.createElement("a");
+    franceBtn.className = "flag-btn";
+    franceBtn.href = frenchHref;
+    franceBtn.target = "_self";
+    franceBtn.innerHTML = '<img src="assets/img/flags/fr.png" alt="French">';
+
+    franceBtn.addEventListener("click", function () {
+      trackLanguageSelection("French", title, file, "pdf", frenchHref);
+      gaEvent("article_click_french", {
+        article_title: title,
+        article_file: file,
+        language: "French"
+      });
+    });
+
     // Append buttons
     flagActions.appendChild(americanBtn);
     flagActions.appendChild(philippinesBtn);
     flagActions.appendChild(spainBtn);
     flagActions.appendChild(kuwaitBtn);
+    flagActions.appendChild(franceBtn);
     const topActions = document.createElement("div");
     topActions.style.display = "flex";
     topActions.style.gap = "10px";
@@ -1127,7 +1201,7 @@
         .filter(x => x && x.file)
         .map((item, index) => ({
           ...item,
-          number: item.number ?? index + 1
+          number: getResolvedArticleNumber(item, index + 1)
         }));
       applyFilter();
       handleArticleSelectionFromQuery();
@@ -1159,7 +1233,10 @@
         { title: "Faithful Without Fandom - Faith Without Compromise in Leadership", file: "Faithful Without Fandom.pdf", description: "Faithful Without Fandom - is a principled reflection on maintaining moral discernment, clean conscience, and spiritual integrity under flawed political leadership without idolizing power or compromising faith.", categories: ["Kingdom Living"] },
         { title: "Change Your Input Change Your World", file: "Change Your Input Change Your World.pdf", description: "Change Your Input, Change Your World - explores how the thoughts, information, and narratives we repeatedly consume shape our perception of reality, teaching that deliberate mental alignment transforms both inner life and outer experience.", categories: ["Kingdom Living"] },
         { title: "When Silence Is Strength: Choosing Dignity Over Reaction", file: "When Silence Is Strength.pdf", description: "This article teaches that choosing silence over reaction is a disciplined act of dignity and inner strength that preserves peace and protects the integrity of the soul.", categories: ["Wisdom & Character"] }
-      ];
+      ].map((item, index) => ({
+        ...item,
+        number: getResolvedArticleNumber(item, index + 1)
+      }));
       applyFilter();
       handleArticleSelectionFromQuery();
     }
@@ -1174,6 +1251,22 @@
       event.preventDefault();
       const anchorId = link.getAttribute("data-article-target");
       scrollToArticle(anchorId);
+    });
+  }
+
+  if (featuredArticleLinkEl) {
+    featuredArticleLinkEl.addEventListener("click", (event) => {
+      event.preventDefault();
+
+      const featuredTitle = featuredArticleLinkEl.dataset.featuredTitle || featuredArticleLinkEl.textContent || "";
+      const matchedItem = findArticleByTitle(featuredTitle);
+      if (!matchedItem) return;
+
+      if (q) q.value = "";
+      activeCategory = "";
+      syncActiveCategoryButtons();
+      render(all);
+      scrollToArticle(articleAnchorId(matchedItem));
     });
   }
 

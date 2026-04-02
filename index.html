@@ -92,6 +92,30 @@
       font-size:13px;
       line-height:1.5;
     }
+
+    .new-articles-heading-row{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .featured-article-label{
+      color:var(--gold);
+      font-size:18px;
+      letter-spacing:.2px;
+    }
+    .featured-article-link{
+      color:#5aa0ff;
+      font-size:18px;
+      letter-spacing:.2px;
+      text-decoration:none;
+      font-weight:600;
+      transition:opacity .12s ease, text-shadow .12s ease;
+    }
+    .featured-article-link:hover{
+      opacity:.92;
+      text-shadow:0 0 14px rgba(90,160,255,.25);
+    }
     .new-articles-list{
       list-style:none;
       margin:0;
@@ -503,7 +527,12 @@
   <section class="new-articles" aria-labelledby="new-articles-title">
     <div class="new-articles-head">
       <div>
-        <h2 id="new-articles-title" class="new-articles-title">5 New Added Article Files</h2>
+        <div class="new-articles-heading-row">
+          <h2 id="new-articles-title" class="new-articles-title">5 New Added Article Files</h2>
+          <span class="featured-article-label" aria-hidden="true"><strong>.</strong></span>
+          <span class="featured-article-label"><strong>Featured Article</strong></span>
+          <a href="#" id="featured-article-link" class="featured-article-link" data-featured-title="Joy In Suffering">Joy In Suffering</a>
+        </div>
       </div>
     </div>
     <ul id="new-articles-list" class="new-articles-list"></ul>
@@ -564,6 +593,7 @@
   const categoryTotalEl = document.getElementById("category-total");
   const articleListBtn = document.getElementById("article-list-btn");
   const newArticlesListEl = document.getElementById("new-articles-list");
+  const featuredArticleLinkEl = document.getElementById("featured-article-link");
 
   const countDoctrineRevEl = document.getElementById("count-doctrine-rev");
   const countPropheticEl = document.getElementById("count-prophetic");
@@ -729,6 +759,45 @@
       .replace(/\.[^.]+$/, "")
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "");
+  }
+
+  function findArticleByTitle(title = "") {
+    const normalizedTitle = String(title || "").trim().toLowerCase();
+    if (!normalizedTitle) return null;
+
+    return all.find(item => {
+      const itemTitle = String(item.title || baseName(item.file || "")).trim().toLowerCase();
+      return itemTitle === normalizedTitle;
+    }) || null;
+  }
+
+  function getFeaturedArticleForVisit(sourceList) {
+    if (!Array.isArray(sourceList) || !sourceList.length) return null;
+
+    const visitKey = "featuredArticleVisitIndex";
+    let nextIndex = 0;
+
+    try {
+      const storedValue = sessionStorage.getItem(visitKey);
+      const storedIndex = Number.parseInt(storedValue || "0", 10);
+      nextIndex = Number.isFinite(storedIndex) && storedIndex >= 0 ? storedIndex : 0;
+      sessionStorage.setItem(visitKey, String(nextIndex + 1));
+    } catch (error) {
+      nextIndex = Math.floor(Math.random() * sourceList.length);
+    }
+
+    return sourceList[nextIndex % sourceList.length] || sourceList[0] || null;
+  }
+
+  function updateFeaturedArticle(sourceList) {
+    if (!featuredArticleLinkEl) return;
+
+    const featuredItem = getFeaturedArticleForVisit(sourceList);
+    if (!featuredItem) return;
+
+    const featuredTitle = featuredItem.title || baseName(featuredItem.file || "Untitled");
+    featuredArticleLinkEl.textContent = featuredTitle;
+    featuredArticleLinkEl.dataset.featuredTitle = featuredTitle;
   }
 
   function scrollToArticle(anchorId) {
@@ -1163,6 +1232,7 @@
           ...item,
           number: getResolvedArticleNumber(item, index + 1)
         }));
+      updateFeaturedArticle(all);
       applyFilter();
       handleArticleSelectionFromQuery();
     } catch (err) {
@@ -1197,6 +1267,7 @@
         ...item,
         number: getResolvedArticleNumber(item, index + 1)
       }));
+      updateFeaturedArticle(all);
       applyFilter();
       handleArticleSelectionFromQuery();
     }
@@ -1211,6 +1282,22 @@
       event.preventDefault();
       const anchorId = link.getAttribute("data-article-target");
       scrollToArticle(anchorId);
+    });
+  }
+
+  if (featuredArticleLinkEl) {
+    featuredArticleLinkEl.addEventListener("click", (event) => {
+      event.preventDefault();
+
+      const featuredTitle = featuredArticleLinkEl.dataset.featuredTitle || featuredArticleLinkEl.textContent || "";
+      const matchedItem = findArticleByTitle(featuredTitle);
+      if (!matchedItem) return;
+
+      if (q) q.value = "";
+      activeCategory = "";
+      syncActiveCategoryButtons();
+      render(all);
+      scrollToArticle(articleAnchorId(matchedItem));
     });
   }
 
