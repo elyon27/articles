@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>List of Articles</title>
+  <meta name="description" content="Alphabetical list of all articles" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    :root{
+      --bg:#070b12;
+      --card:#0e1422;
+      --text:#e9eefc;
+      --muted:#b8c2dd;
+      --line:rgba(255,255,255,.10);
+      --gold:#d8b46a;
+    }
+    body{
+      margin:0;
+      background: radial-gradient(1200px 700px at 20% 10%, rgba(216,180,106,.10), transparent 60%),
+                  radial-gradient(900px 600px at 90% 0%, rgba(90,160,255,.10), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+    main{
+      max-width:1100px;
+      margin:0 auto;
+      padding:28px 16px 64px;
+    }
+    .page-head{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:16px;
+      margin:6px 0 18px;
+      padding-bottom:14px;
+      border-bottom:1px solid var(--line);
+      flex-wrap:wrap;
+    }
+    .page-head h1{
+      margin:0;
+      font-size:28px;
+      letter-spacing:.2px;
+    }
+    .page-head p{
+      margin:6px 0 0;
+      color:var(--muted);
+      max-width:70ch;
+      line-height:1.5;
+    }
+    .search{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:10px 12px;
+      min-width:260px;
+      max-width:460px;
+    }
+    .search input{
+      width:100%;
+      border:0;
+      outline:0;
+      background:transparent;
+      color:var(--text);
+      font-size:14px;
+    }
+    .panel{
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      box-shadow:0 10px 30px rgba(0,0,0,.22);
+      overflow:hidden;
+    }
+    .panel-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:16px 18px;
+      border-bottom:1px solid var(--line);
+      flex-wrap:wrap;
+    }
+    .count-chip{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      min-height:42px;
+      padding:0 14px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.06);
+      color:var(--text);
+      white-space:nowrap;
+    }
+    .count-chip strong{ color:var(--gold); }
+    .article-list{
+      list-style:none;
+      margin:0;
+      padding:0;
+    }
+    .article-item + .article-item{
+      border-top:1px solid var(--line);
+    }
+    .article-link{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:14px 18px;
+      text-decoration:none;
+      color:var(--text);
+      transition:background .12s ease, transform .12s ease;
+    }
+    .article-link:hover{
+      background:rgba(255,255,255,.06);
+    }
+    .article-title{
+      font-size:15px;
+      line-height:1.45;
+    }
+    .article-file{
+      color:var(--muted);
+      font-size:12px;
+      text-align:right;
+      word-break:break-word;
+    }
+    .back-badge {
+      text-decoration:none;
+      font-weight:600;
+      letter-spacing:0.4px;
+      padding:8px 16px;
+      border-radius:8px;
+      background:rgba(255,255,255,0.08);
+      color:#e9eefc;
+      border:1px solid rgba(255,255,255,0.18);
+      transition:all 0.25s ease;
+    }
+    .back-badge:hover {
+      background:rgba(255,255,255,0.14);
+      border-color:rgba(255,255,255,0.35);
+      transform:translateY(-1px);
+    }
+    .empty{
+      padding:18px;
+      color:var(--muted);
+      display:none;
+    }
+    @media (max-width: 640px){
+      .page-head{ align-items:flex-start; }
+      .search{ min-width:0; width:100%; }
+      .article-link{ flex-direction:column; align-items:flex-start; }
+      .article-file{ text-align:left; }
+    }
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="container navbar">
+    <a class="brand" href="https://crownmind.netlify.app" aria-label="CrownMind Institute Home">
+      <img src="assets/img/crownmindlogo.jpg" alt="CrownMind Institute Logo" class="brand-logo">
+      <span>CrownMind Institute</span>
+    </a>
+
+    <nav>
+      <div class="links" style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a href="index.html" class="back-badge">Back To Articles</a>
+        <a href="https://crownmind-community.netlify.app/" class="back-badge">Community</a>
+        <a href="https://crownmind.netlify.app" class="back-badge">Back To Mission</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="page-head">
+    <div>
+      <h1>List of Articles</h1>
+      <p>All articles are listed in alphabetical order. Click any title to return to the main Articles page and align directly to that article card.</p>
+    </div>
+    <div class="search" aria-label="Search articles in list">
+      <span style="opacity:.8;">🔎</span>
+      <input id="q" type="search" placeholder="Search article title…" autocomplete="off" />
+    </div>
+  </div>
+
+  <section class="panel" aria-labelledby="list-title">
+    <div class="panel-head">
+      <div id="list-title" class="count-chip"><strong>0</strong> Articles</div>
+    </div>
+    <ul id="article-list" class="article-list"></ul>
+    <div id="empty" class="empty">No articles matched your search.</div>
+  </section>
+</main>
+
+<script>
+  const MANIFEST = new URL('./assets/articles/articles.json', window.location.href).href;
+  const listEl = document.getElementById('article-list');
+  const emptyEl = document.getElementById('empty');
+  const countEl = document.getElementById('list-title');
+  const q = document.getElementById('q');
+  let all = [];
+
+  function baseName(filename) {
+    const i = filename.lastIndexOf('.');
+    return i >= 0 ? filename.slice(0, i) : filename;
+  }
+
+  function escapeHtml(s = '') {
+    return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  function articleAnchorId(item) {
+    const raw = item?.file || item?.title || 'article';
+    return 'article-' + String(raw)
+      .toLowerCase()
+      .replace(/\.[^.]+$/, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
+  function buildIndexHref(item) {
+    const url = new URL('index.html', window.location.href);
+    url.searchParams.set('selectedArticle', item.title || baseName(item.file || 'Untitled'));
+    url.searchParams.set('selectedFile', item.file || '');
+    url.hash = articleAnchorId(item);
+    return url.href;
+  }
+
+  function render(list) {
+    countEl.innerHTML = `<strong>${list.length}</strong> Article${list.length !== 1 ? 's' : ''}`;
+
+    if (!list.length) {
+      listEl.innerHTML = '';
+      emptyEl.style.display = 'block';
+      return;
+    }
+
+    emptyEl.style.display = 'none';
+    listEl.innerHTML = list.map(item => {
+      const title = item.title || baseName(item.file || 'Untitled');
+      const file = item.file || '';
+      return `
+        <li class="article-item">
+          <a class="article-link" href="${buildIndexHref(item)}">
+            <span class="article-title">${escapeHtml(title)}</span>
+            <span class="article-file">${escapeHtml(file)} → Open in Articles</span>
+          </a>
+        </li>
+      `;
+    }).join('');
+  }
+
+  function applyFilter() {
+    const term = (q.value || '').trim().toLowerCase();
+    const filtered = all.filter(item => {
+      const title = String(item.title || baseName(item.file || '')).toLowerCase();
+      const file = String(item.file || '').toLowerCase();
+      return !term || title.includes(term) || file.includes(term);
+    });
+    render(filtered);
+  }
+
+  async function loadManifest() {
+    try {
+      const res = await fetch(MANIFEST, { cache: 'no-store' });
+      if (!res.ok) throw new Error('Manifest not found: ' + MANIFEST);
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : (data.articles || []);
+      all = list
+        .filter(item => item && item.file)
+        .map(item => ({
+          ...item,
+          title: item.title || baseName(item.file)
+        }))
+        .sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: 'base' }));
+      applyFilter();
+    } catch (error) {
+      console.error('Manifest load failed:', error);
+      all = [];
+      applyFilter();
+      emptyEl.textContent = 'Unable to load the article manifest right now.';
+    }
+  }
+
+  q.addEventListener('input', applyFilter);
+  loadManifest();
+</script>
+</body>
+</html>

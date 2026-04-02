@@ -524,6 +524,10 @@
         <strong>0</strong> Categories
       </button>
 
+      <a href="article-list.html" id="article-list-btn" class="count-chip small" aria-label="Open list of articles">
+        <strong>≡</strong> List of Articles
+      </a>
+
       <div class="category-group small" aria-label="Category breakdown">
         <button type="button" id="count-doctrine-rev" class="category-chip" data-category="Doctrine & Revelation"><strong>0</strong> Doctrine & Revelation</button>
         <button type="button" id="count-prophetic" class="category-chip" data-category="Prophetic Scrolls"><strong>0</strong> Prophetic Scrolls</button>
@@ -557,6 +561,7 @@
   const q = document.getElementById("q");
   const countEl = document.getElementById("article-count");
   const categoryTotalEl = document.getElementById("category-total");
+  const articleListBtn = document.getElementById("article-list-btn");
   const newArticlesListEl = document.getElementById("new-articles-list");
 
   const countDoctrineRevEl = document.getElementById("count-doctrine-rev");
@@ -568,6 +573,61 @@
 
   let all = [];
   let activeCategory = "";
+
+  function gaEvent(eventName, params = {}) {
+    if (typeof window.gtag === "function") {
+      window.gtag("event", eventName, params);
+    }
+  }
+
+  function slugifyFileStem(value = "") {
+    return String(value)
+      .replace(/\.[^.]+$/, "")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
+  function setPendingArticleTracking(payload = {}) {
+    try {
+      sessionStorage.setItem("pendingArticleTracking", JSON.stringify({
+        ...payload,
+        timestamp: Date.now()
+      }));
+    } catch (error) {
+      console.warn("Unable to store pending article tracking payload.", error);
+    }
+  }
+
+  function trackLanguageSelection(language, articleTitle, articleFile, destinationType, destinationHref) {
+    const normalizedLanguage = String(language || "Unknown");
+    gaEvent("article_language_selected", {
+      article_title: articleTitle,
+      article_file: articleFile,
+      language: normalizedLanguage,
+      destination_type: destinationType
+    });
+
+    setPendingArticleTracking({
+      article_title: articleTitle,
+      article_file: articleFile,
+      language: normalizedLanguage,
+      destination_type: destinationType,
+      destination_href: destinationHref
+    });
+  }
+
+  function buildTrackedArticleHref(file, title, language = "English") {
+    const trackedBaseHref = trackingPages[file] || (PDF_DIR + file);
+    if (!trackingPages[file]) return trackedBaseHref;
+
+    const url = new URL(trackedBaseHref, window.location.href);
+    url.searchParams.set("article", title || baseName(file || "Untitled"));
+    url.searchParams.set("file", file || "");
+    url.searchParams.set("lang", language);
+    return url.href;
+  }
 
   function escapeHtml(s = "") {
     return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -652,16 +712,77 @@
   }
 
   function scrollToArticle(anchorId) {
-    if (!anchorId) return;
-    const target = document.getElementById(anchorId);
-    if (!target) return;
+    if (!anchorId) return false;
+    const card = document.getElementById(anchorId);
+    if (!card) return false;
 
-    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    const titleEl = card.querySelector(".title") || card;
+    const rect = titleEl.getBoundingClientRect();
+    const absoluteTop = rect.top + window.pageYOffset;
+    const centeredTop = Math.max(0, absoluteTop - ((window.innerHeight - rect.height) / 2));
 
-    target.classList.add("article-highlight");
+    window.scrollTo({
+      top: centeredTop,
+      behavior: "smooth"
+    });
+
+    card.classList.add("article-highlight");
     window.setTimeout(() => {
-      target.classList.remove("article-highlight");
+      card.classList.remove("article-highlight");
     }, 1800);
+
+    return true;
+  }
+
+  function resolveSelectedArticleAnchor() {
+    const params = new URLSearchParams(window.location.search);
+    const hashAnchorId = (window.location.hash || "").replace(/^#/, "").trim();
+    const selectedTitle = (params.get("selectedArticle") || "").trim();
+    const selectedFile = (params.get("selectedFile") || "").trim();
+
+    if (hashAnchorId && document.getElementById(hashAnchorId)) {
+      return hashAnchorId;
+    }
+
+    if (!selectedTitle && !selectedFile) return "";
+
+    let matchedItem = null;
+
+    if (selectedFile) {
+      matchedItem = all.find(item => String(item.file || "").trim().toLowerCase() === selectedFile.toLowerCase());
+    }
+
+    if (!matchedItem && selectedTitle) {
+      matchedItem = all.find(item => String(item.title || baseName(item.file || "")).trim().toLowerCase() === selectedTitle.toLowerCase());
+    }
+
+    return matchedItem ? articleAnchorId(matchedItem) : "";
+  }
+
+  function handleArticleSelectionFromQuery() {
+    const anchorId = resolveSelectedArticleAnchor();
+    if (!anchorId) return;
+
+    if (q) q.value = "";
+    activeCategory = "";
+    syncActiveCategoryButtons();
+    render(all);
+
+    const attemptScroll = () => {
+      const didScroll = scrollToArticle(anchorId);
+      if (!didScroll) return;
+      window.requestAnimationFrame(() => scrollToArticle(anchorId));
+      window.setTimeout(() => scrollToArticle(anchorId), 250);
+    };
+
+    window.requestAnimationFrame(attemptScroll);
+    window.setTimeout(attemptScroll, 120);
+
+    const cleanUrl = new URL(window.location.href);
+    cleanUrl.searchParams.delete("selectedArticle");
+    cleanUrl.searchParams.delete("selectedFile");
+    cleanUrl.hash = anchorId;
+    window.history.replaceState({}, document.title, cleanUrl.pathname + cleanUrl.search + cleanUrl.hash);
   }
 
   function renderNewArticles(sourceList) {
@@ -780,19 +901,26 @@
 
     const readBtn = document.createElement("a");
     readBtn.className = "btn";
-    readBtn.href = trackingPages[file] || pdfHref;
+    readBtn.href = buildTrackedArticleHref(file, title, "English");
     readBtn.target = "_self";
     readBtn.innerHTML = `<span class="icon">📖</span> Read Article`;
 
-    // 🔥 ADD THIS
     readBtn.addEventListener("click", function () {
-      if (typeof gtag === "function") {
-        gtag("event", "read_article_click", {
-         article_title: title,
-         article_file: file,
-         location: "main_list"
-       });
-      }
+      gaEvent("read_article_click", {
+        article_title: title,
+        article_file: file,
+        language: "English",
+        location: "main_list",
+        destination_type: trackingPages[file] ? "tracked_html" : "pdf"
+      });
+
+      setPendingArticleTracking({
+        article_title: title,
+        article_file: file,
+        language: "English",
+        destination_type: trackingPages[file] ? "tracked_html" : "pdf",
+        destination_href: readBtn.href
+      });
     });
 
 
@@ -819,12 +947,12 @@
     americanBtn.innerHTML = '<img src="assets/img/flags/us.png" alt="English">';
 
     americanBtn.addEventListener("click", function () {
-      if (typeof gtag === "function") {
-        gtag("event", "article_click_english", {
-          article_title: title,
-          language: "american"
-        });
-      }
+      trackLanguageSelection("English", title, file, "pdf", englishHref);
+      gaEvent("article_click_english", {
+        article_title: title,
+        article_file: file,
+        language: "English"
+      });
     });
 
     // 🇵🇭 Tagalog Button
@@ -835,12 +963,12 @@
     philippinesBtn.innerHTML = '<img src="assets/img/flags/ph.png" alt="Tagalog">';
 
     philippinesBtn.addEventListener("click", function () {
-      if (typeof gtag === "function") {
-        gtag("event", "article_click_tagalog", {
-          article_title: title,
-          language: "tagalog"
-        });
-      }
+      trackLanguageSelection("Tagalog", title, file, "pdf", tagalogHref);
+      gaEvent("article_click_tagalog", {
+        article_title: title,
+        article_file: file,
+        language: "Tagalog"
+      });
     });
 
     // 🇪🇸 Spanish Button
@@ -851,12 +979,12 @@
     spainBtn.innerHTML = '<img src="assets/img/flags/es.png" alt="Spanish">';
 
     spainBtn.addEventListener("click", function () {
-      if (typeof gtag === "function") {
-        gtag("event", "article_click_spanish", {
-          article_title: title,
-          language: "spanish"
-        });
-      }
+      trackLanguageSelection("Spanish", title, file, "pdf", spanishHref);
+      gaEvent("article_click_spanish", {
+        article_title: title,
+        article_file: file,
+        language: "Spanish"
+      });
     });
 
     // 🇰🇼 Arabic Button
@@ -867,12 +995,12 @@
     kuwaitBtn.innerHTML = '<img src="assets/img/flags/kw.png" alt="Arabic">';
 
     kuwaitBtn.addEventListener("click", function () {
-      if (typeof gtag === "function") {
-        gtag("event", "article_click_arabic", {
-          article_title: title,
-          language: "arabic"
-        });
-      }
+      trackLanguageSelection("Arabic", title, file, "pdf", arabicHref);
+      gaEvent("article_click_arabic", {
+        article_title: title,
+        article_file: file,
+        language: "Arabic"
+      });
     });
 
     // Append buttons
@@ -996,6 +1124,7 @@
           number: item.number ?? index + 1
         }));
       applyFilter();
+      handleArticleSelectionFromQuery();
     } catch (err) {
       console.error("Manifest load failed:", err);
       all = [
@@ -1026,6 +1155,7 @@
         { title: "When Silence Is Strength: Choosing Dignity Over Reaction", file: "When Silence Is Strength.pdf", description: "This article teaches that choosing silence over reaction is a disciplined act of dignity and inner strength that preserves peace and protects the integrity of the soul.", categories: ["Wisdom & Character"] }
       ];
       applyFilter();
+      handleArticleSelectionFromQuery();
     }
   }
 
@@ -1044,7 +1174,55 @@
   if (categoryTotalEl) {
     categoryTotalEl.addEventListener("click", showAllArticles);
   }
+  if (articleListBtn) {
+    articleListBtn.addEventListener("click", () => {
+      gaEvent("article_list_open", {
+        location: "main_toolbar"
+      });
+    });
+  }
   categoryButtons.forEach(btn => btn.addEventListener("click", () => setActiveCategory(btn.dataset.category)));
+
+  (function trackEntryContext() {
+    const params = new URLSearchParams(window.location.search);
+    const articleTitle = params.get("article") || document.title || "Articles";
+    const articleFile = params.get("file") || "";
+    const language = params.get("lang") || "English";
+
+    if (params.get("article") || params.get("file") || params.get("lang")) {
+      gaEvent("article_page_view", {
+        article_title: articleTitle,
+        article_file: articleFile,
+        language: language,
+        page_type: "tracked_html"
+      });
+    }
+
+    try {
+      const stored = sessionStorage.getItem("pendingArticleTracking");
+      if (!stored) return;
+
+      const payload = JSON.parse(stored);
+      const maxAgeMs = 10 * 60 * 1000;
+      if (!payload || !payload.timestamp || (Date.now() - payload.timestamp) > maxAgeMs) {
+        sessionStorage.removeItem("pendingArticleTracking");
+        return;
+      }
+
+      if (payload.destination_type === "tracked_html" && (params.get("article") || params.get("file"))) {
+        sessionStorage.removeItem("pendingArticleTracking");
+      }
+    } catch (error) {
+      console.warn("Unable to read pending article tracking payload.", error);
+    }
+  })();
+
+  window.addEventListener("load", () => {
+    const hashAnchorId = (window.location.hash || "").replace(/^#/, "").trim();
+    if (!hashAnchorId) return;
+    window.setTimeout(() => scrollToArticle(hashAnchorId), 200);
+  });
+
   loadManifest();
 </script>
 </body>
