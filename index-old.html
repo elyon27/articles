@@ -771,6 +771,35 @@
     }) || null;
   }
 
+  function getFeaturedArticleForVisit(sourceList) {
+    if (!Array.isArray(sourceList) || !sourceList.length) return null;
+
+    const visitKey = "featuredArticleVisitIndex";
+    let nextIndex = 0;
+
+    try {
+      const storedValue = sessionStorage.getItem(visitKey);
+      const storedIndex = Number.parseInt(storedValue || "0", 10);
+      nextIndex = Number.isFinite(storedIndex) && storedIndex >= 0 ? storedIndex : 0;
+      sessionStorage.setItem(visitKey, String(nextIndex + 1));
+    } catch (error) {
+      nextIndex = Math.floor(Math.random() * sourceList.length);
+    }
+
+    return sourceList[nextIndex % sourceList.length] || sourceList[0] || null;
+  }
+
+  function updateFeaturedArticle(sourceList) {
+    if (!featuredArticleLinkEl) return;
+
+    const featuredItem = getFeaturedArticleForVisit(sourceList);
+    if (!featuredItem) return;
+
+    const featuredTitle = featuredItem.title || baseName(featuredItem.file || "Untitled");
+    featuredArticleLinkEl.textContent = featuredTitle;
+    featuredArticleLinkEl.dataset.featuredTitle = featuredTitle;
+  }
+
   function scrollToArticle(anchorId) {
     if (!anchorId) return false;
     const card = document.getElementById(anchorId);
@@ -1203,6 +1232,7 @@
           ...item,
           number: getResolvedArticleNumber(item, index + 1)
         }));
+      updateFeaturedArticle(all);
       applyFilter();
       handleArticleSelectionFromQuery();
     } catch (err) {
@@ -1237,6 +1267,7 @@
         ...item,
         number: getResolvedArticleNumber(item, index + 1)
       }));
+      updateFeaturedArticle(all);
       applyFilter();
       handleArticleSelectionFromQuery();
     }
