@@ -300,6 +300,14 @@
       width:100%;
     }
 
+    .flag-rows{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:10px;
+      width:100%;
+    }
+
     .flag-actions{
       display:flex;
       gap:10px;
@@ -579,6 +587,7 @@
   const SPANISH_DIR = "assets/articles/spanish/";
   const ARABIC_DIR = "assets/articles/arabic/";
   const FRENCH_DIR = "assets/articles/french/";
+  const GERMAN_DIR = "assets/articles/german/";
   const COVERS_DIR = "assets/articles/covers/";
   const MANIFEST = new URL("./assets/articles/articles.json", window.location.href).href;
 
@@ -907,11 +916,13 @@
     const spanishFile = item.spanishFile || makeLocalizedFilename(file, "sp");
     const arabicFile = item.arabicFile || makeLocalizedFilename(file, "ar");
     const frenchFile = item.frenchFile || makeLocalizedFilename(file, "fr");
+    const germanFile = item.germanFile || makeLocalizedFilename(file, "de");
     const englishHref = makeDownloadHref(ENGLISH_DIR, englishFile);
     const tagalogHref = makeDownloadHref(TAGALOG_DIR, tagalogFile);
     const spanishHref = makeDownloadHref(SPANISH_DIR, spanishFile);
     const arabicHref = makeDownloadHref(ARABIC_DIR, arabicFile);
     const frenchHref = makeDownloadHref(FRENCH_DIR, frenchFile);
+    const germanHref = makeDownloadHref(GERMAN_DIR, germanFile);
 
     const coverCandidates = [];
     if (item.cover) coverCandidates.push(COVERS_DIR + item.cover);
@@ -1027,6 +1038,9 @@
       });
     });
 
+    const flagRows = document.createElement("div");
+    flagRows.className = "flag-rows";
+
     const flagActions = document.createElement("div");
     flagActions.className = "flag-actions";
 
@@ -1110,12 +1124,36 @@
       });
     });
 
+    // 🇩🇪 German Button
+    const germanyBtn = document.createElement("a");
+    germanyBtn.className = "flag-btn";
+    germanyBtn.href = germanHref;
+    germanyBtn.target = "_self";
+    germanyBtn.innerHTML = '<img src="assets/img/flags/de.png" alt="German">';
+
+    germanyBtn.addEventListener("click", function () {
+      trackLanguageSelection("German", title, file, "pdf", germanHref);
+      gaEvent("article_click_german", {
+        article_title: title,
+        article_file: file,
+        language: "German"
+      });
+    });
+
     // Append buttons
     flagActions.appendChild(americanBtn);
     flagActions.appendChild(philippinesBtn);
     flagActions.appendChild(spainBtn);
     flagActions.appendChild(kuwaitBtn);
     flagActions.appendChild(franceBtn);
+
+    const germanFlagRow = document.createElement("div");
+    germanFlagRow.className = "flag-actions";
+    germanFlagRow.appendChild(germanyBtn);
+
+    flagRows.appendChild(flagActions);
+    flagRows.appendChild(germanFlagRow);
+
     const topActions = document.createElement("div");
     topActions.style.display = "flex";
     topActions.style.gap = "10px";
@@ -1125,7 +1163,7 @@
     topActions.appendChild(backToTopBtn);
 
     articleLinks.appendChild(topActions);
-    articleLinks.appendChild(flagActions);
+    articleLinks.appendChild(flagRows);
 
     const meta = document.createElement("span");
     meta.className = "small";
