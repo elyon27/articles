@@ -588,6 +588,7 @@
   const ARABIC_DIR = "assets/articles/arabic/";
   const FRENCH_DIR = "assets/articles/french/";
   const GERMAN_DIR = "assets/articles/german/";
+  const KOREAN_DIR = "assets/articles/korean/";
   const COVERS_DIR = "assets/articles/covers/";
   const MANIFEST = new URL("./assets/articles/articles.json", window.location.href).href;
 
@@ -917,13 +918,14 @@
     const arabicFile = item.arabicFile || makeLocalizedFilename(file, "ar");
     const frenchFile = item.frenchFile || makeLocalizedFilename(file, "fr");
     const germanFile = item.germanFile || makeLocalizedFilename(file, "de");
+    const koreanFile = item.koreanFile || makeLocalizedFilename(file, "kr");
     const englishHref = makeDownloadHref(ENGLISH_DIR, englishFile);
     const tagalogHref = makeDownloadHref(TAGALOG_DIR, tagalogFile);
     const spanishHref = makeDownloadHref(SPANISH_DIR, spanishFile);
     const arabicHref = makeDownloadHref(ARABIC_DIR, arabicFile);
     const frenchHref = makeDownloadHref(FRENCH_DIR, frenchFile);
     const germanHref = makeDownloadHref(GERMAN_DIR, germanFile);
-
+    const koreanHref = makeDownloadHref(KOREAN_DIR, koreanFile);
     const coverCandidates = [];
     if (item.cover) coverCandidates.push(COVERS_DIR + item.cover);
 
@@ -1044,7 +1046,8 @@
     const flagActions = document.createElement("div");
     flagActions.className = "flag-actions";
 
-    // 🇺🇸 English Button
+<!-- 
+   // 🇺🇸 English Button
     const americanBtn = document.createElement("a");
     americanBtn.className = "flag-btn";
     americanBtn.href = englishHref;
@@ -1059,6 +1062,7 @@
         language: "English"
       });
     });
+-->
 
     // 🇵🇭 Tagalog Button
     const philippinesBtn = document.createElement("a");
@@ -1124,6 +1128,22 @@
       });
     });
 
+    // 🇰🇷 Korean Button
+    const koreaBtn = document.createElement("a");
+    koreaBtn.className = "flag-btn";
+    koreaBtn.href = koreanHref;
+    koreaBtn.target = "_self";
+    koreaBtn.innerHTML = '<img src="assets/img/flags/kr.png" alt="Korean">';
+
+    koreaBtn.addEventListener("click", function () {
+      trackLanguageSelection("Korean", title, file, "pdf", koreanHref);
+      gaEvent("article_click_korean", {
+        article_title: title,
+        article_file: file,
+        language: "Korean"
+      });
+    });
+
     // 🇩🇪 German Button
     const germanyBtn = document.createElement("a");
     germanyBtn.className = "flag-btn";
@@ -1141,11 +1161,12 @@
     });
 
     // Append buttons
-    flagActions.appendChild(americanBtn);
+<!--    flagActions.appendChild(americanBtn); -->
     flagActions.appendChild(philippinesBtn);
     flagActions.appendChild(spainBtn);
     flagActions.appendChild(kuwaitBtn);
     flagActions.appendChild(franceBtn);
+    flagActions.appendChild(koreaBtn);
 
     const germanFlagRow = document.createElement("div");
     germanFlagRow.className = "flag-actions";
